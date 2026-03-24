@@ -1,0 +1,2170 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hinske.Tech — Echte AI. Auf echter Hardware.</title>
+<meta name="description" content="Hinske.Tech zeigt, was mit Open-Source KI auf normaler Consumer-Hardware möglich ist — komplett kostenlos, auf Deutsch.">
+<meta name="keywords" content="AI, KI, Open Source, lokal, Hardware, Ollama, deutsch, kostenlos, Hinske.Tech">
+<meta name="author" content="Marvin Hinske">
+<meta name="robots" content="index, follow">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Hinske.Tech — Echte AI. Auf echter Hardware.">
+<meta property="og:description" content="Open-Source KI auf Consumer-Hardware. Komplett kostenlos, auf Deutsch.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://hinske.tech">
+<meta property="og:image" content="https://hinske.tech/assets/hinske-bg.jpg">
+<meta property="og:locale" content="de_DE">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Hinske.Tech — Echte AI. Auf echter Hardware.">
+<meta name="twitter:description" content="Open-Source KI auf Consumer-Hardware. Komplett kostenlos, auf Deutsch.">
+
+<link rel="canonical" href="https://hinske.tech">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+/* ─── Reset & Tokens ─────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #09090b; --bg-card: #18181b; --bg-hover: #27272a;
+  --border: rgba(255,255,255,0.07); --border-g: rgba(212,160,23,0.35);
+  --gold: #d4a017; --gold-l: #f5c842; --gold-m: rgba(212,160,23,0.12);
+  --text: #fafafa; --sub: #a1a1aa; --dim: #52525b;
+  --green: #22c55e; --blue: #3b82f6; --red: #ef4444;
+  --mono: 'JetBrains Mono', monospace; --sans: 'Inter', sans-serif;
+}
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: var(--sans); font-size: 16px; line-height: 1.6;
+  overflow-x: hidden; -webkit-font-smoothing: antialiased;
+  cursor: none;
+}
+a { cursor: none; }
+
+/* ─── Circuit Background ─────────────────── */
+#circuit-bg {
+  position: fixed; inset: 0; z-index: 0;
+  background-image: url('assets/hinske-bg.jpg');
+  background-size: cover; background-position: center;
+  opacity: .07;
+  pointer-events: none;
+}
+#circuit-spotlight {
+  position: fixed; inset: 0; z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(600px circle at var(--sx,50%) var(--sy,50%),
+    rgba(9,9,11,0) 0%,
+    rgba(9,9,11,0.7) 40%,
+    rgba(9,9,11,0.97) 70%
+  );
+  transition: background .05s;
+}
+
+nav, section, footer, .section-divider { position: relative; z-index: 2; }
+section { background: rgba(9,9,11,0.6); }
+.hero { background: transparent; }
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 2px; }
+
+/* ─── Custom Cursor ──────────────────────── */
+#cursor {
+  position: fixed; width: 12px; height: 12px; border-radius: 50%;
+  background: var(--gold); pointer-events: none; z-index: 9999;
+  transform: translate(-50%,-50%);
+  transition: width .2s, height .2s, background .2s, opacity .2s;
+  mix-blend-mode: difference;
+}
+#cursor-ring {
+  position: fixed; width: 40px; height: 40px; border-radius: 50%;
+  border: 1px solid rgba(212,160,23,0.5); pointer-events: none; z-index: 9998;
+  transform: translate(-50%,-50%);
+  transition: width .35s cubic-bezier(.25,.46,.45,.94),
+              height .35s cubic-bezier(.25,.46,.45,.94),
+              transform .08s linear, opacity .3s;
+}
+#cursor.hover { width: 6px; height: 6px; }
+#cursor-ring.hover { width: 64px; height: 64px; border-color: var(--gold); }
+
+/* ─── Nav ────────────────────────────────── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 48px; height: 68px;
+  background: rgba(9,9,11,0.7);
+  backdrop-filter: blur(24px) saturate(1.8);
+  border-bottom: 1px solid var(--border);
+  transition: background .4s, transform .3s;
+}
+nav.hidden { transform: translateY(-100%); }
+.nav-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+.nav-logo img { height: 42px; width: auto; object-fit: contain; filter: brightness(1.05); }
+.nav-right { display: flex; align-items: center; gap: 28px; }
+.nav-links { display: flex; gap: 32px; list-style: none; }
+.nav-links a {
+  color: var(--sub); text-decoration: none; font-size: 14px; font-weight: 500;
+  transition: color .2s; position: relative;
+}
+.nav-links a::after {
+  content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px;
+  background: var(--gold); transition: width .3s;
+}
+.nav-links a:hover { color: var(--text); }
+.nav-links a:hover::after { width: 100%; }
+
+.lang-toggle {
+  display: flex; gap: 0; border: 1px solid var(--border); border-radius: 6px; overflow: hidden;
+  font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 1px;
+}
+.lang-btn {
+  padding: 5px 10px; background: transparent; border: none; color: var(--dim);
+  cursor: none; transition: all .2s;
+}
+.lang-btn.active { background: var(--gold); color: #000; }
+.lang-btn:hover:not(.active) { color: var(--text); background: var(--bg-hover); }
+
+.nav-cta {
+  background: var(--gold); color: #000; font-weight: 700;
+  font-size: 13px; padding: 9px 22px; border-radius: 8px;
+  text-decoration: none; letter-spacing: .5px;
+  transition: background .2s, transform .15s, box-shadow .2s;
+  position: relative; overflow: hidden;
+}
+.nav-cta::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+  opacity: 0; transition: opacity .2s;
+}
+.nav-cta:hover { background: var(--gold-l); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(212,160,23,.5); }
+.nav-cta:hover::after { opacity: 1; }
+
+/* Mobile nav */
+.nav-hamburger {
+  display: none; flex-direction: column; gap: 5px; background: none; border: none;
+  cursor: none; padding: 4px;
+}
+.nav-hamburger span {
+  display: block; width: 24px; height: 2px; background: var(--text);
+  transition: all .3s;
+}
+.mobile-menu {
+  display: none; position: fixed; top: 68px; left: 0; right: 0; bottom: 0;
+  background: rgba(9,9,11,0.98); backdrop-filter: blur(20px);
+  z-index: 99; flex-direction: column; align-items: center; justify-content: center; gap: 32px;
+}
+.mobile-menu.open { display: flex; }
+.mobile-menu a {
+  color: var(--text); text-decoration: none; font-size: 24px; font-weight: 600;
+  transition: color .2s;
+}
+.mobile-menu a:hover { color: var(--gold); }
+
+/* ─── Hero ───────────────────────────────── */
+.hero {
+  position: relative; min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 120px 24px 80px; overflow: hidden;
+}
+.hero-bg {
+  position: absolute; inset: 0;
+  background-image: url('assets/hinske-bg.jpg');
+  background-size: cover; background-position: center;
+  transform: scale(1.05);
+  transition: transform 8s ease;
+}
+.hero-bg-overlay {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(9,9,11,.55) 0%, rgba(9,9,11,.92) 70%, #09090b 100%);
+}
+#hero-canvas {
+  position: absolute; inset: 0; pointer-events: none; z-index: 1;
+}
+.hero-content { position: relative; z-index: 2; max-width: 900px; }
+
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(9,9,11,.6); border: 1px solid var(--border-g);
+  backdrop-filter: blur(12px);
+  color: var(--gold-l); font-family: var(--mono);
+  font-size: 11px; font-weight: 700; letter-spacing: 2px;
+  padding: 6px 18px; border-radius: 100px; margin-bottom: 36px;
+  animation: fadeUp .8s ease both;
+}
+.hero-badge .led {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--green); box-shadow: 0 0 10px var(--green);
+  animation: blink-led 2s ease-in-out infinite;
+}
+@keyframes blink-led { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+.hero-title {
+  font-size: clamp(48px, 8vw, 96px); font-weight: 900;
+  line-height: 1.0; letter-spacing: -3px; margin-bottom: 24px;
+  animation: fadeUp .8s .1s ease both;
+}
+.hero-title .brand {
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-l) 50%, var(--gold) 100%);
+  background-size: 200%;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 3s ease infinite;
+}
+@keyframes shimmer { 0%,100%{background-position:0%} 50%{background-position:100%} }
+
+.hero-sub {
+  font-size: clamp(16px, 2.2vw, 21px); color: var(--sub); max-width: 620px;
+  margin: 0 auto 40px; animation: fadeUp .8s .2s ease both; line-height: 1.7;
+}
+.hero-pills {
+  display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+  margin-bottom: 44px; animation: fadeUp .8s .3s ease both;
+}
+.pill {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(24,24,27,.7); border: 1px solid var(--border);
+  backdrop-filter: blur(8px);
+  color: var(--sub); font-size: 13px; padding: 8px 16px; border-radius: 100px;
+  transition: border-color .3s, color .3s, transform .2s;
+}
+.pill:hover { border-color: var(--border-g); color: var(--gold-l); transform: translateY(-2px); }
+.pill svg { width: 14px; height: 14px; }
+
+.hero-cta-row {
+  display: flex; gap: 14px; flex-wrap: wrap; justify-content: center;
+  animation: fadeUp .8s .4s ease both;
+}
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--gold); color: #000; font-weight: 700; font-size: 15px;
+  padding: 14px 28px; border-radius: 10px; text-decoration: none;
+  transition: all .2s; box-shadow: 0 0 30px rgba(212,160,23,.3);
+  position: relative; overflow: hidden;
+}
+.btn-primary::before {
+  content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.25), transparent);
+  transition: left .4s;
+}
+.btn-primary:hover::before { left: 100%; }
+.btn-primary:hover { background: var(--gold-l); transform: translateY(-2px); box-shadow: 0 8px 40px rgba(212,160,23,.5); }
+
+.btn-secondary {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: transparent; color: var(--text); font-weight: 600; font-size: 15px;
+  padding: 14px 28px; border-radius: 10px; text-decoration: none;
+  border: 1px solid var(--border); transition: all .2s;
+}
+.btn-secondary:hover { border-color: var(--border-g); background: var(--gold-m); color: var(--gold-l); }
+
+.hero-scroll {
+  position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  color: var(--dim); font-size: 10px; font-family: var(--mono); letter-spacing: 2px;
+  z-index: 2; animation: fadeUp 1s 1.2s ease both;
+}
+.scroll-arrow {
+  width: 1px; height: 40px; background: linear-gradient(to bottom, var(--dim), transparent);
+  animation: grow 2s ease-in-out infinite;
+}
+@keyframes grow { 0%,100%{transform:scaleY(1);opacity:.5} 50%{transform:scaleY(1.4);opacity:1} }
+@keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:none} }
+
+/* ─── Section ────────────────────────────── */
+section { padding: 120px 48px; }
+.max-w { max-width: 1200px; margin: 0 auto; }
+.section-label {
+  font-family: var(--mono); font-size: 11px; font-weight: 700;
+  letter-spacing: 3px; color: var(--gold); margin-bottom: 14px;
+}
+.section-title {
+  font-size: clamp(32px, 4vw, 54px); font-weight: 800;
+  letter-spacing: -1.5px; line-height: 1.1; margin-bottom: 14px;
+}
+.section-sub { font-size: 17px; color: var(--sub); max-width: 540px; margin-bottom: 60px; line-height: 1.7; }
+.section-divider { height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); margin: 0 48px; position: relative; z-index: 2; }
+
+/* ─── Reveal ─────────────────────────────── */
+.reveal { opacity: 0; transform: translateY(32px); transition: opacity .75s ease, transform .75s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+.reveal-delay-1 { transition-delay: .1s; }
+.reveal-delay-2 { transition-delay: .2s; }
+.reveal-delay-3 { transition-delay: .3s; }
+
+/* ─── Bento Grid ─────────────────────────── */
+.bento { display: grid; grid-template-columns: repeat(12, 1fr); gap: 14px; }
+.bento-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 20px; padding: 36px; overflow: hidden;
+  position: relative;
+  transition: border-color .3s, box-shadow .3s;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.bento-card .glow {
+  position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(400px circle at var(--mx,50%) var(--my,50%), rgba(212,160,23,.07), transparent 60%);
+  opacity: 0; transition: opacity .3s;
+}
+.bento-card:hover .glow { opacity: 1; }
+.bento-card:hover { border-color: rgba(212,160,23,.25); box-shadow: 0 0 50px rgba(212,160,23,.06), 0 24px 64px rgba(0,0,0,.6); }
+.bento-card.large  { grid-column: span 7; }
+.bento-card.small  { grid-column: span 5; }
+.bento-card.half   { grid-column: span 6; }
+.bento-card.third  { grid-column: span 4; }
+.bento-card.full   { grid-column: span 12; }
+
+.card-icon {
+  width: 46px; height: 46px; border-radius: 12px;
+  background: var(--gold-m); border: 1px solid var(--border-g);
+  display: flex; align-items: center; justify-content: center; margin-bottom: 22px;
+}
+.card-icon svg { width: 20px; height: 20px; color: var(--gold); }
+.card-title { font-size: 21px; font-weight: 700; letter-spacing: -.5px; margin-bottom: 10px; }
+.card-body { color: var(--sub); font-size: 14px; line-height: 1.75; }
+.card-tag {
+  display: inline-block; margin-top: 18px;
+  background: var(--gold-m); border: 1px solid var(--border-g);
+  color: var(--gold-l); font-family: var(--mono);
+  font-size: 10px; font-weight: 700; letter-spacing: 1.5px; padding: 4px 12px; border-radius: 6px;
+}
+
+/* Terminal */
+.terminal {
+  margin-top: 24px; background: #0c0c0e;
+  border: 1px solid rgba(255,255,255,.07); border-radius: 12px; overflow: hidden;
+  font-family: var(--mono); font-size: 12.5px;
+}
+.terminal-bar {
+  background: #161618; padding: 9px 14px;
+  display: flex; align-items: center; gap: 6px;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+}
+.terminal-bar .t-title {
+  flex: 1; text-align: center; color: var(--dim); font-size: 11px; letter-spacing: 1px;
+}
+.dot-r{width:10px;height:10px;border-radius:50%;background:#ef4444}
+.dot-y{width:10px;height:10px;border-radius:50%;background:#f59e0b}
+.dot-g{width:10px;height:10px;border-radius:50%;background:#22c55e}
+.terminal-body { padding: 16px; min-height: 120px; }
+.t-line { margin-bottom: 3px; line-height: 1.6; }
+.t-prompt { color: var(--green); }
+.t-cmd { color: var(--text); }
+.t-dim { color: var(--dim); }
+.t-out { color: var(--gold); }
+.t-cursor {
+  display: inline-block; width: 7px; height: 13px;
+  background: var(--gold); vertical-align: middle;
+  animation: cur-blink 1s step-end infinite;
+}
+@keyframes cur-blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* Progress bar animated */
+.pb-wrap {
+  height: 2px; background: rgba(255,255,255,.06); border-radius: 1px; margin-top: 8px; overflow: hidden;
+}
+.pb-bar {
+  height: 100%; border-radius: 1px; background: var(--gold);
+  width: 0; transition: width 1.5s cubic-bezier(.4,0,.2,1);
+}
+
+/* ─── Counter Numbers ────────────────────── */
+.stat-num {
+  font-size: 52px; font-weight: 900; letter-spacing: -2px;
+  line-height: 1; font-variant-numeric: tabular-nums;
+}
+.stat-gold { color: var(--gold); }
+
+/* ─── YouTube Section ────────────────────── */
+.yt-embed-wrap {
+  position: relative; border-radius: 20px; overflow: hidden;
+  border: 1px solid var(--border); aspect-ratio: 16/9;
+  background: var(--bg-card);
+  transition: border-color .3s, box-shadow .3s;
+}
+.yt-embed-wrap:hover { border-color: var(--border-g); box-shadow: 0 0 60px rgba(212,160,23,.08); }
+.yt-embed-wrap iframe {
+  position: absolute; inset: 0; width: 100%; height: 100%; border: 0;
+}
+.yt-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px; margin-top: 24px;
+}
+.yt-thumb {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 16px; overflow: hidden; transition: all .3s;
+  position: relative;
+}
+.yt-thumb:hover { border-color: var(--border-g); transform: translateY(-4px); box-shadow: 0 16px 48px rgba(0,0,0,.5); }
+.yt-thumb-img {
+  width: 100%; aspect-ratio: 16/9; background: var(--bg-hover);
+  display: flex; align-items: center; justify-content: center; position: relative;
+  overflow: hidden;
+}
+.yt-thumb-img::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(9,9,11,.6), transparent 50%);
+}
+.yt-thumb-play {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: rgba(212,160,23,.9); display: flex; align-items: center; justify-content: center;
+  position: relative; z-index: 1;
+  transition: transform .2s, box-shadow .2s;
+}
+.yt-thumb:hover .yt-thumb-play { transform: scale(1.1); box-shadow: 0 0 30px rgba(212,160,23,.5); }
+.yt-thumb-info { padding: 16px; }
+.yt-thumb-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.yt-thumb-meta { font-size: 11px; color: var(--dim); font-family: var(--mono); }
+
+/* ─── Hardware Section ───────────────────── */
+.hw-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.hw-item {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 22px 24px;
+  display: flex; align-items: flex-start; gap: 18px;
+  transition: all .25s; position: relative; overflow: hidden;
+}
+.hw-item::after {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
+  background: var(--gold); transform: scaleY(0); transform-origin: bottom;
+  transition: transform .3s;
+}
+.hw-item:hover { border-color: var(--border-g); transform: translateX(4px); }
+.hw-item:hover::after { transform: scaleY(1); }
+.hw-icon {
+  width: 44px; height: 44px; flex-shrink: 0; border-radius: 12px;
+  background: var(--gold-m); border: 1px solid var(--border-g);
+  display: flex; align-items: center; justify-content: center;
+}
+.hw-icon svg { width: 20px; height: 20px; color: var(--gold); }
+.hw-name { font-weight: 700; font-size: 14px; margin-bottom: 3px; }
+.hw-spec { font-size: 12px; color: var(--sub); font-family: var(--mono); }
+.hw-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 8px; }
+.hw-tag {
+  font-size: 10px; color: var(--dim);
+  background: rgba(255,255,255,.03); border: 1px solid var(--border);
+  padding: 2px 7px; border-radius: 4px; font-family: var(--mono);
+}
+.hw-item.featured { border-color: rgba(212,160,23,.3); grid-column: span 2; }
+.hw-item.featured .hw-name { color: var(--gold-l); }
+
+/* HW terminal */
+.hw-terminal {
+  background: #0c0c0e; border: 1px solid rgba(255,255,255,.07);
+  border-radius: 12px; overflow: hidden; font-family: var(--mono); font-size: 12px;
+  margin-top: 14px;
+}
+.hw-terminal-body { padding: 16px; line-height: 1.8; }
+
+/* Info Card */
+.info-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 20px; padding: 36px;
+}
+
+/* Model Guide */
+.model-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.model-label { font-family: var(--mono); font-size: 11px; color: var(--dim); width: 68px; flex-shrink: 0; }
+.model-bar-wrap { flex: 1; height: 5px; background: rgba(255,255,255,.05); border-radius: 3px; overflow: hidden; }
+.model-bar { height: 100%; border-radius: 3px; width: 0; transition: width 1.4s cubic-bezier(.4,0,.2,1); }
+.model-use { font-size: 11px; color: var(--sub); width: 130px; flex-shrink: 0; }
+
+/* ─── Social Section ─────────────────────── */
+.social-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+.social-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 20px; padding: 36px; text-align: center;
+  text-decoration: none; color: var(--text);
+  transition: all .3s; position: relative; overflow: hidden;
+}
+.social-card::before {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 0;
+  transition: height .4s; opacity: .1;
+}
+.social-card:hover { transform: translateY(-8px); border-color: var(--border-g); }
+.social-card:hover::before { height: 100%; }
+.social-card.yt::before { background: #ff0000; }
+.social-card.ig::before { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+.social-card.tt::before { background: #00f2ea; }
+.social-card.li::before { background: #0a66c2; }
+.social-card-icon {
+  width: 64px; height: 64px; border-radius: 16px; margin: 0 auto 18px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--gold-m); border: 1px solid var(--border-g);
+  transition: transform .3s, box-shadow .3s;
+  position: relative;
+}
+.social-card:hover .social-card-icon { transform: scale(1.1) rotate(-3deg); box-shadow: 0 8px 30px rgba(212,160,23,.2); }
+.social-card-icon svg { width: 28px; height: 28px; }
+.social-card-name { font-size: 18px; font-weight: 700; margin-bottom: 6px; position: relative; }
+.social-card-handle { font-size: 13px; color: var(--dim); font-family: var(--mono); position: relative; }
+.social-card-cta {
+  display: inline-flex; align-items: center; gap: 6px; margin-top: 16px;
+  font-size: 13px; font-weight: 600; color: var(--gold);
+  position: relative; transition: gap .2s;
+}
+.social-card:hover .social-card-cta { gap: 10px; }
+
+/* ─── CTA ────────────────────────────────── */
+.cta-section {
+  padding: 120px 48px; text-align: center;
+  position: relative; overflow: hidden;
+}
+.cta-section::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background-image: url('assets/hinske-bg.jpg'); background-size: cover; background-position: center;
+  opacity: .04;
+}
+.cta-card {
+  max-width: 680px; margin: 0 auto;
+  background: rgba(24,24,27,.8); border: 1px solid var(--border-g);
+  border-radius: 28px; padding: 70px 60px;
+  position: relative; overflow: hidden;
+  backdrop-filter: blur(20px);
+}
+.cta-card::before {
+  content: ''; position: absolute; top: -1px; left: 10%; right: 10%; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+.cta-card-bg {
+  position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse 80% 60% at 50% 120%, rgba(212,160,23,.1), transparent);
+}
+.cta-title { font-size: clamp(28px,4vw,44px); font-weight: 800; letter-spacing: -1.5px; margin-bottom: 14px; line-height: 1.1; position: relative; }
+.cta-sub { color: var(--sub); font-size: 16px; margin-bottom: 36px; line-height: 1.7; position: relative; }
+.yt-btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: #ff0000; color: #fff; font-weight: 700; font-size: 15px;
+  padding: 14px 28px; border-radius: 10px; text-decoration: none;
+  transition: all .2s; box-shadow: 0 0 30px rgba(255,0,0,.2); position: relative;
+}
+.yt-btn:hover { background: #cc0000; transform: translateY(-2px); box-shadow: 0 8px 40px rgba(255,0,0,.4); }
+
+/* ─── Footer ─────────────────────────────── */
+footer {
+  padding: 48px 48px 64px; border-top: 1px solid var(--border);
+  display: flex; flex-direction: column; align-items: center; gap: 24px;
+  text-align: center;
+}
+.footer-terminal {
+  font-family: var(--mono); font-size: 13px; color: var(--gold);
+  letter-spacing: 2px; font-weight: 700;
+  text-shadow: 0 0 20px rgba(212,160,23,.3);
+  margin-bottom: 4px;
+}
+.footer-tagline {
+  font-size: 13px; color: var(--sub); max-width: 400px; line-height: 1.6;
+}
+.footer-links { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; }
+.footer-links a { color: var(--dim); text-decoration: none; font-size: 12px; transition: color .2s; font-family: var(--mono); letter-spacing: .5px; }
+.footer-links a:hover { color: var(--gold); }
+.footer-divider { width: 60px; height: 1px; background: var(--border); }
+.footer-copy { font-size: 11px; color: var(--dim); font-family: var(--mono); letter-spacing: 1px; }
+
+/* ─── Glitch ─────────────────────────────── */
+@keyframes glitch-1 {
+  0%,100%{clip-path:inset(0 0 95% 0);transform:translate(-2px)}
+  20%{clip-path:inset(30% 0 50% 0);transform:translate(2px)}
+  40%{clip-path:inset(60% 0 20% 0);transform:translate(-1px)}
+}
+@keyframes glitch-2 {
+  0%,100%{clip-path:inset(80% 0 0 0);transform:translate(2px)}
+  30%{clip-path:inset(10% 0 70% 0);transform:translate(-2px)}
+}
+.glitch { position: relative; }
+.glitch::before, .glitch::after {
+  content: attr(data-text);
+  position: absolute; left: 0; top: 0; width: 100%;
+  color: inherit; background: transparent;
+}
+.glitch::before { color: var(--gold); opacity: 0; }
+.glitch::after  { color: #3b82f6;    opacity: 0; }
+.glitch.active::before { opacity: .7; animation: glitch-1 .3s steps(1) forwards; }
+.glitch.active::after  { opacity: .7; animation: glitch-2 .3s steps(1) .05s forwards; }
+
+/* ─── Boot Sequence Overlay ──────────────── */
+#boot-overlay {
+  position: fixed; left: 0; right: 0; top: 0; height: 100vh; z-index: 10000;
+  background: var(--bg);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 13px; color: var(--green);
+  padding: 24px;
+}
+#boot-log {
+  max-width: 600px; width: 100%; line-height: 1.8;
+}
+#boot-log .boot-line { opacity: 0; animation: bootFade .15s forwards; }
+@keyframes bootFade { to { opacity: 1; } }
+#boot-log .boot-ok { color: var(--green); }
+#boot-log .boot-gold { color: var(--gold); }
+#boot-log .boot-dim { color: var(--dim); }
+#boot-log .boot-white { color: var(--text); }
+#boot-progress {
+  width: 100%; max-width: 600px; height: 2px; margin-top: 20px;
+  background: rgba(255,255,255,.06); border-radius: 1px; overflow: hidden;
+}
+#boot-progress-bar {
+  height: 100%; background: var(--gold); width: 0;
+  transition: width .3s cubic-bezier(.4,0,.2,1);
+}
+
+/* ─── Scanlines + Grain ─────────────────── */
+#scanlines {
+  position: fixed; inset: 0; z-index: 3; pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.03) 2px,
+    rgba(0,0,0,0.03) 4px
+  );
+  mix-blend-mode: multiply;
+}
+#grain {
+  position: fixed; inset: -50%; z-index: 3; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  animation: grain-shift 0.5s steps(1) infinite;
+  opacity: .4;
+}
+@keyframes grain-shift {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(-2%, 2%); }
+  50%  { transform: translate(1%, -1%); }
+  75%  { transform: translate(-1%, 3%); }
+  100% { transform: translate(2%, -2%); }
+}
+
+/* ─── Matrix Rain Canvas ────────────────── */
+#matrix-rain {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  opacity: .06;
+}
+
+/* ─── Status Ticker Bar ─────────────────── */
+#status-ticker {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+  height: 28px; background: rgba(9,9,11,0.95);
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center;
+  font-family: var(--mono); font-size: 10px; overflow: hidden;
+  backdrop-filter: blur(12px);
+}
+#status-ticker .ticker-fixed {
+  display: flex; align-items: center; gap: 16px;
+  padding: 0 16px; border-right: 1px solid var(--border);
+  color: var(--dim); white-space: nowrap; flex-shrink: 0;
+}
+#status-ticker .ticker-led {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--green); box-shadow: 0 0 6px var(--green);
+  animation: blink-led 3s ease-in-out infinite;
+}
+#status-ticker .ticker-scroll {
+  flex: 1; overflow: hidden; position: relative;
+}
+#status-ticker .ticker-track {
+  display: flex; gap: 48px; white-space: nowrap;
+  animation: ticker-scroll 40s linear infinite;
+  color: var(--dim);
+}
+#status-ticker .ticker-track span { display: flex; align-items: center; gap: 6px; }
+#status-ticker .ticker-track .t-gold { color: var(--gold); }
+#status-ticker .ticker-track .t-green { color: var(--green); }
+@keyframes ticker-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ─── Terminal Section Divider ──────────── */
+.section-divider-terminal {
+  position: relative; z-index: 2;
+  padding: 0 48px; margin: 0;
+  font-family: var(--mono); font-size: 10px; color: var(--dim);
+  display: flex; align-items: center; gap: 12px;
+  height: 36px; letter-spacing: 1px;
+}
+.section-divider-terminal::before,
+.section-divider-terminal::after {
+  content: ''; flex: 1; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+}
+.section-divider-terminal .divider-cmd { color: var(--gold); }
+
+/* ─── Nav terminal style ────────────────── */
+.nav-links a .cmd-prefix {
+  color: var(--gold); font-family: var(--mono); font-size: 11px; margin-right: 4px;
+  opacity: 0; transition: opacity .2s;
+}
+.nav-links a:hover .cmd-prefix { opacity: 1; }
+
+/* ─── Hero typing cursor for subtitle ───── */
+.typing-cursor {
+  display: inline-block; width: 2px; height: 1em;
+  background: var(--gold); vertical-align: text-bottom;
+  animation: cur-blink 1s step-end infinite;
+  margin-left: 2px;
+}
+
+
+/* ─── EMP Shockwave on Click ────────────── */
+.emp-wave {
+  position: fixed; pointer-events: none; z-index: 9996;
+  border-radius: 50%; transform: translate(-50%, -50%);
+  /* Ring = border glow */
+  border: 2px solid rgba(212,160,23,.8);
+  box-shadow:
+    0 0 15px rgba(212,160,23,.5),
+    0 0 40px rgba(212,160,23,.2),
+    inset 0 0 15px rgba(212,160,23,.15);
+  background: radial-gradient(circle, rgba(212,160,23,.06) 0%, transparent 70%);
+  animation: empExpand var(--emp-dur, .8s) cubic-bezier(.15,.6,.35,1) forwards;
+}
+.emp-wave.secondary {
+  border-color: rgba(212,160,23,.3);
+  box-shadow:
+    0 0 10px rgba(212,160,23,.2),
+    0 0 30px rgba(212,160,23,.08);
+  background: none;
+  animation-delay: .08s;
+}
+@keyframes empExpand {
+  0%   { width: 0; height: 0; opacity: 1; }
+  30%  { opacity: .8; }
+  70%  { opacity: .3; }
+  100% { width: var(--emp-size, 350px); height: var(--emp-size, 350px); opacity: 0; }
+}
+
+/* EMP screen-wide flash */
+.emp-flash {
+  position: fixed; inset: 0; z-index: 9995; pointer-events: none;
+  background: radial-gradient(circle at var(--fx) var(--fy),
+    rgba(212,160,23,.08) 0%,
+    transparent 60%
+  );
+  animation: empFlash .5s ease-out forwards;
+}
+@keyframes empFlash {
+  0%   { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* EMP distortion on nearby elements */
+@keyframes empGlitch {
+  0%   { filter: brightness(1) hue-rotate(0deg); transform: translate(0); }
+  15%  { filter: brightness(1.8) hue-rotate(-10deg); transform: translate(1px, -1px); }
+  30%  { filter: brightness(0.7) hue-rotate(5deg); transform: translate(-1px, 1px); }
+  50%  { filter: brightness(1.3) hue-rotate(-3deg); transform: translate(0); }
+  100% { filter: brightness(1) hue-rotate(0deg); transform: translate(0); }
+}
+.emp-hit {
+  animation: empGlitch .35s ease-out forwards !important;
+}
+
+/* EMP horizontal scanline burst */
+.emp-scanline {
+  position: fixed; left: 0; right: 0; z-index: 9997; pointer-events: none;
+  height: 2px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(212,160,23,.4) 20%,
+    rgba(212,160,23,.8) 50%,
+    rgba(212,160,23,.4) 80%,
+    transparent 100%
+  );
+  animation: empScanline .6s ease-out forwards;
+  box-shadow: 0 0 8px rgba(212,160,23,.5);
+}
+@keyframes empScanline {
+  0%   { opacity: 1; transform: scaleX(.3); }
+  30%  { opacity: .8; transform: scaleX(1); }
+  100% { opacity: 0; transform: scaleX(1); }
+}
+
+/* ─── CRT Power-On Transition ───────────── */
+#crt-line {
+  position: fixed; left: 0; right: 0; top: 50%; z-index: 10001;
+  height: 2px; background: var(--gold);
+  box-shadow: 0 0 30px rgba(212,160,23,.8), 0 0 80px rgba(212,160,23,.4);
+  transform: scaleX(0); transform-origin: center;
+  pointer-events: none;
+}
+#crt-flash {
+  position: fixed; inset: 0; z-index: 10001;
+  background: rgba(212,160,23,.15);
+  pointer-events: none; opacity: 0;
+}
+@keyframes crtLineExpand {
+  0%   { transform: scaleX(0); height: 2px; }
+  30%  { transform: scaleX(1); height: 2px; }
+  35%  { transform: scaleX(1); height: 3px; }
+  50%  { transform: scaleX(1); height: 6px; opacity: .8; }
+  75%  { transform: scaleX(1); height: 100vh; top: 0; opacity: .12; }
+  100% { transform: scaleX(1); height: 100vh; top: 0; opacity: 0; }
+}
+@keyframes crtFlash {
+  0%   { opacity: 0; }
+  8%   { opacity: .25; }
+  16%  { opacity: 0; }
+  24%  { opacity: .12; }
+  35%  { opacity: 0; }
+  50%  { opacity: .06; }
+  100% { opacity: 0; }
+}
+
+/* ─── Responsive ─────────────────────────── */
+@media (max-width: 1024px) {
+  .bento-card.large, .bento-card.small, .bento-card.half, .bento-card.third { grid-column: span 6; }
+  .bento-card.full { grid-column: span 12; }
+  .hw-item.featured { grid-column: span 2; }
+  section { padding: 80px 24px; }
+}
+@media (max-width: 768px) {
+  nav { padding: 0 20px; }
+  .nav-links { display: none; }
+  .lang-toggle { display: none; }
+  .nav-hamburger { display: flex; }
+  .mobile-menu .lang-toggle-mobile { display: flex; gap: 0; margin-top: 12px; }
+  .bento { grid-template-columns: 1fr; }
+  .bento-card.large, .bento-card.small, .bento-card.half, .bento-card.third, .bento-card.full { grid-column: span 1; }
+  .hw-grid { grid-template-columns: 1fr; }
+  .hw-item.featured { grid-column: span 1; }
+  .hero-title { letter-spacing: -1.5px; }
+  section { padding: 60px 16px; }
+  .section-divider { margin: 0 16px; }
+  footer { padding: 24px 16px 56px; flex-direction: column; text-align: center; }
+  .cta-card { padding: 40px 24px; }
+  .section-divider-terminal { padding: 0 16px; }
+  .social-grid { grid-template-columns: 1fr 1fr; }
+  /* Hide custom cursor on mobile */
+  #cursor, #cursor-ring { display: none; }
+  body { cursor: auto; }
+  a { cursor: pointer; }
+}
+@media (max-width: 480px) {
+  .social-grid { grid-template-columns: 1fr; }
+  .hero { padding: 100px 16px 60px; }
+  #status-ticker .ticker-fixed span:nth-child(3) { display: none; }
+}
+@media (max-width: 768px) {
+  .hw-layout { grid-template-columns: 1fr !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- Boot Sequence Overlay -->
+<div id="boot-overlay">
+  <div id="boot-log"></div>
+  <div id="boot-progress"><div id="boot-progress-bar"></div></div>
+</div>
+<div id="crt-line"></div>
+<div id="crt-flash"></div>
+
+<!-- Scanlines + Grain -->
+<div id="scanlines"></div>
+<div id="grain"></div>
+
+<!-- Matrix Rain -->
+<canvas id="matrix-rain"></canvas>
+
+<!-- Circuit Background -->
+<div id="circuit-bg"></div>
+<div id="circuit-spotlight"></div>
+
+<!-- Custom Cursor -->
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- ─── NAV ──────────────────────────────── -->
+<nav id="nav">
+  <a href="#" class="nav-logo">
+    <img src="assets/hinske-text.png" alt="Hinske.Tech">
+  </a>
+  <div class="nav-right">
+    <ul class="nav-links">
+      <li><a href="#mission"><span class="cmd-prefix">&gt;_</span><span data-i18n="nav.mission">Mission</span></a></li>
+      <li><a href="#builds"><span class="cmd-prefix">&gt;_</span><span data-i18n="nav.builds">Builds</span></a></li>
+      <li><a href="#hardware"><span class="cmd-prefix">&gt;_</span><span data-i18n="nav.hardware">Hardware</span></a></li>
+      <li><a href="#social"><span class="cmd-prefix">&gt;_</span><span data-i18n="nav.social">Social</span></a></li>
+    </ul>
+    <div class="lang-toggle">
+      <button class="lang-btn active" data-lang="de">DE</button>
+      <button class="lang-btn" data-lang="en">EN</button>
+    </div>
+    <a href="https://www.youtube.com/@HinskeTech" target="_blank" rel="noopener" class="nav-cta">YouTube →</a>
+    <button class="nav-hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobile-menu">
+  <a href="#mission" data-i18n="nav.mission">Mission</a>
+  <a href="#builds" data-i18n="nav.builds">Builds</a>
+  <a href="#hardware" data-i18n="nav.hardware">Hardware</a>
+  <a href="#social" data-i18n="nav.social">Social</a>
+  <a href="https://www.youtube.com/@HinskeTech" target="_blank" rel="noopener" style="color:var(--gold)">YouTube →</a>
+  <div class="lang-toggle" style="margin-top:12px">
+    <button class="lang-btn active" data-lang="de">DE</button>
+    <button class="lang-btn" data-lang="en">EN</button>
+  </div>
+</div>
+
+<!-- ─── HERO ──────────────────────────────── -->
+<section class="hero" id="hero">
+  <div class="hero-bg" id="hero-bg"></div>
+  <div class="hero-bg-overlay"></div>
+  <canvas id="hero-canvas"></canvas>
+
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="led"></span>OPEN SOURCE · LOKAL · KOSTENLOS
+    </div>
+
+    <h1 class="hero-title">
+      <span data-i18n="hero.title1">Echte AI.</span><br>
+      <span data-i18n="hero.title2">Auf echter </span><span class="brand glitch" data-text="Hardware." data-i18n="hero.title3">Hardware.</span>
+    </h1>
+
+    <p class="hero-sub" id="hero-sub-type">
+      <span data-i18n="hero.sub">Hinske.Tech zeigt, was mit Open-Source KI auf normaler Consumer-Hardware möglich ist — komplett kostenlos, auf Deutsch.</span><span class="typing-cursor" id="hero-cursor"></span>
+    </p>
+
+    <div class="hero-pills">
+      <div class="pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg><span data-i18n="hero.pill1">Kein Cloud-Abo</span></div>
+      <div class="pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg><span data-i18n="hero.pill2">Sofort nachbaubar</span></div>
+      <div class="pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span data-i18n="hero.pill3">Täglich neuer Content</span></div>
+      <div class="pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span data-i18n="hero.pill4">100% Kostenlos</span></div>
+    </div>
+
+    <div class="hero-cta-row">
+      <a href="https://www.youtube.com/@HinskeTech" target="_blank" rel="noopener" class="btn-primary" id="btn-cta">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 00-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 00.5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 002.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 002.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98" fill="#000"/></svg>
+        <span data-i18n="hero.cta1">YouTube Kanal</span>
+      </a>
+      <a href="#mission" class="btn-secondary"><span data-i18n="hero.cta2">Mehr erfahren</span> →</a>
+    </div>
+  </div>
+
+  <div class="hero-scroll"><span data-i18n="hero.scroll">SCROLL</span> <div class="scroll-arrow"></div></div>
+</section>
+
+<div class="section-divider-terminal"><span class="divider-cmd">~</span> <span>EOF</span></div>
+
+<!-- ─── MISSION / BENTO ───────────────────── -->
+<section id="mission">
+  <div class="max-w">
+    <div class="reveal">
+      <div class="section-label">// KERNVERSPRECHEN</div>
+      <h2 class="section-title" data-i18n="mission.title">Warum Hinske.Tech<br>anders ist.</h2>
+      <p class="section-sub" data-i18n="mission.sub">Kein Marketing-Bullshit. Keine teuren Abos. Nur echte Projekte auf echter Hardware.</p>
+    </div>
+
+    <div class="bento reveal">
+
+      <!-- Large: Terminal live -->
+      <div class="bento-card large" data-tilt>
+        <div class="glow"></div>
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg></div>
+        <div class="card-title" data-i18n="mission.card1.title">Alles kostenlos &amp; Open Source</div>
+        <div class="card-body" data-i18n="mission.card1.body">Kein einziges Tool, das ein Abo erfordert. Wir zeigen immer die kostenlose Alternative. Immer.</div>
+        <div class="card-tag">OPEN SOURCE FIRST</div>
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="dot-r"></div><div class="dot-y"></div><div class="dot-g"></div>
+            <div class="t-title">bash — hinsketech</div>
+          </div>
+          <div class="terminal-body" id="live-terminal"></div>
+        </div>
+      </div>
+
+      <!-- Small: Hardware -->
+      <div class="bento-card small" data-tilt>
+        <div class="glow"></div>
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+        <div class="card-title" data-i18n="mission.card2.title">Echter Hardware-Test</div>
+        <div class="card-body" data-i18n="mission.card2.body">GTX 1080, Raspberry Pi, alter Laptop. Wir testen auf dem, was du zuhause hast — nicht auf A100-Servern.</div>
+        <div class="card-tag">REAL HARDWARE</div>
+        <div style="margin-top:20px">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:1px;margin-bottom:8px">GPU VRAM</div>
+          <div class="pb-wrap"><div class="pb-bar" data-width="78" style="background:var(--gold)"></div></div>
+          <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--dim);margin-top:4px"><span>GTX 1080 8GB</span><span style="color:var(--gold)">6.2 / 8 GB</span></div>
+        </div>
+        <div style="margin-top:14px">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:1px;margin-bottom:8px">RAM</div>
+          <div class="pb-wrap"><div class="pb-bar" data-width="62" style="background:var(--green)"></div></div>
+          <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--dim);margin-top:4px"><span>DDR4</span><span style="color:var(--green)">20 / 32 GB</span></div>
+        </div>
+      </div>
+
+      <!-- Half: Auf Deutsch -->
+      <div class="bento-card half" data-tilt>
+        <div class="glow"></div>
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+        <div class="card-title" data-i18n="mission.card3.title">Auf Deutsch</div>
+        <div class="card-body" data-i18n="mission.card3.body">Die deutschsprachige AI-Community verdient eigene, hochwertige Inhalte. Kein übersetzter US-Content.</div>
+        <div class="card-tag">DEUTSCHE AI-COMMUNITY</div>
+      </div>
+
+      <!-- Half: Kein Bullshit -->
+      <div class="bento-card half" data-tilt>
+        <div class="glow"></div>
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+        <div class="card-title" data-i18n="mission.card4.title">Keine Abos, kein Bullshit</div>
+        <div class="card-body" data-i18n="mission.card4.body">Wenn ein Tool nichts taugt, sagen wir das. Keine gesponserten Lobeshymnen, kein Clickbait, kein Paywall.</div>
+        <div class="card-tag">EHRLICH &amp; DIREKT</div>
+      </div>
+
+      <!-- Stats strip -->
+      <div class="bento-card full" style="padding:28px 40px">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px">
+          <div style="display:flex;gap:52px;flex-wrap:wrap;align-items:center">
+            <div><div class="stat-num" style="font-size:36px;letter-spacing:-1px"><span class="stat-gold">0.6</span><span style="color:var(--dim);font-size:24px"> – </span><span>20B</span></div><div style="font-size:12px;color:var(--sub);margin-top:4px" data-i18n="mission.stat1">Modell-Range lokal</div></div>
+            <div style="width:1px;height:50px;background:var(--border)"></div>
+            <div><div class="stat-num"><span class="counter stat-gold" data-target="100">0</span><span>%</span></div><div style="font-size:12px;color:var(--sub);margin-top:4px" data-i18n="mission.stat2">Kostenlos</div></div>
+            <div style="width:1px;height:50px;background:var(--border)"></div>
+            <div><div class="stat-num"><span style="color:var(--gold)">Open</span></div><div style="font-size:12px;color:var(--sub);margin-top:4px">Source First</div></div>
+            <div style="width:1px;height:50px;background:var(--border)"></div>
+            <div><div class="stat-num"><span style="color:var(--gold)">DE</span></div><div style="font-size:12px;color:var(--sub);margin-top:4px" data-i18n="mission.stat4">Auf Deutsch</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider-terminal"><span class="divider-cmd">~</span> <span>EOF</span></div>
+
+<!-- ─── BUILDS / PROJEKTE ────────────────── -->
+<section id="builds">
+  <div class="max-w">
+    <div class="reveal">
+      <div class="section-label">// AKTUELLE BUILDS</div>
+      <h2 class="section-title" data-i18n="builds.title">Was gerade<br>gebaut wird.</h2>
+      <p class="section-sub" data-i18n="builds.sub">Echte Projekte. Echter Code. Auf echter Hardware. Kein Staging, kein Pretend.</p>
+    </div>
+
+    <div class="bento reveal" style="grid-template-columns:repeat(12,1fr)">
+
+      <!-- Featured: TTS Pipeline -->
+      <div class="bento-card large" data-tilt>
+        <div class="glow"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+          <div class="card-icon" style="margin:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></div>
+          <div style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;color:var(--green)">
+            <span style="width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:blink-led 2s infinite"></span>PRODUKTIV
+          </div>
+        </div>
+        <div class="card-title">Qwen3-TTS Pipeline</div>
+        <div class="card-body" data-i18n="builds.tts.body">Lokale Text-zu-Sprache auf der GTX 1080. 1.7B Parameter, x_vector Voice Cloning, chunked Generation. Vollautomatisch als Teil der Content-Pipeline.</div>
+        <div style="margin-top:20px;display:flex;gap:8px;flex-wrap:wrap">
+          <span class="card-tag">Python</span>
+          <span class="card-tag">GTX 1080</span>
+          <span class="card-tag">Qwen3-1.7B</span>
+          <span class="card-tag">lokal</span>
+        </div>
+        <div class="terminal" style="margin-top:20px">
+          <div class="terminal-bar"><div class="dot-r"></div><div class="dot-y"></div><div class="dot-g"></div><div class="t-title">generate_tts_chunked_1.7b.py</div></div>
+          <div class="terminal-body">
+            <div class="t-line"><span class="t-prompt">❯ </span><span class="t-cmd">python3 generate_tts_chunked_1.7b.py tts_script.txt</span></div>
+            <div class="t-line"><span style="color:var(--dim)">[chunk 1/8] generating...</span></div>
+            <div class="t-line"><span style="color:var(--green)">✓ audio_chunk_1.wav — 4.2s</span></div>
+            <div class="t-line"><span style="color:var(--gold)">[GPU] 3.95 GB / 8 GB VRAM</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content Pipeline -->
+      <div class="bento-card small" data-tilt>
+        <div class="glow"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+          <div class="card-icon" style="margin:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div>
+          <div style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;color:var(--green)"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:blink-led 2s infinite"></span>LÄUFT</div>
+        </div>
+        <div class="card-title">Video-Pipeline</div>
+        <div class="card-body" data-i18n="builds.pipeline.body">Vollautomatisch: Skript → TTS → Remotion → ffmpeg → MP4. Vier Kurse, 100 Reels, alles lokal gerendert.</div>
+        <div style="margin-top:16px;display:flex;gap:6px;flex-wrap:wrap">
+          <span class="card-tag">Remotion</span><span class="card-tag">ffmpeg</span><span class="card-tag">h264_nvenc</span>
+        </div>
+        <div style="margin-top:20px">
+          <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--dim);margin-bottom:6px"><span>Rendered</span><span style="color:var(--green)">4 / 4</span></div>
+          <div class="pb-wrap"><div class="pb-bar" data-width="100" style="background:var(--green)"></div></div>
+        </div>
+      </div>
+
+      <!-- n8n Local Stack -->
+      <div class="bento-card half" data-tilt>
+        <div class="glow"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+          <div class="card-icon" style="margin:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg></div>
+          <div style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;color:var(--green)"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:blink-led 1.8s infinite"></span>SELF-HOSTED</div>
+        </div>
+        <div class="card-title">n8n Automation</div>
+        <div class="card-body" data-i18n="builds.n8n.body">Self-hosted auf dem Raspberry Pi. systemd autostart. Läuft 24/7 ohne Cloud, ohne Abo.</div>
+        <div style="margin-top:12px;font-family:var(--mono);font-size:11px;color:var(--dim)">localhost:5678 · <span style="color:var(--gold)">uptime 99.8%</span></div>
+        <div style="margin-top:14px;display:flex;gap:6px"><span class="card-tag">Raspberry Pi</span><span class="card-tag">systemd</span><span class="card-tag">self-hosted</span></div>
+      </div>
+
+      <!-- Diese Website -->
+      <div class="bento-card half" data-tilt>
+        <div class="glow"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+          <div class="card-icon" style="margin:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+          <div style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;color:var(--green)"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:blink-led 2s infinite"></span>LIVE</div>
+        </div>
+        <div class="card-title" data-i18n="builds.website.title">Diese Website</div>
+        <div class="card-body" data-i18n="builds.website.body">Du schaust gerade drauf. Reines HTML/CSS/JS. Three.js Partikel, Custom Cursor, Circuit-Board Spotlight. Kein Framework.</div>
+        <div style="margin-top:12px;display:flex;gap:6px"><span class="card-tag">HTML</span><span class="card-tag">Three.js</span><span class="card-tag">Vercel</span></div>
+      </div>
+
+      <!-- Build Log Strip -->
+      <div class="bento-card full" data-tilt style="padding:28px 36px">
+        <div class="glow"></div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+          <div class="card-icon" style="margin:0;width:36px;height:36px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+          <span style="font-family:var(--mono);font-size:11px;color:var(--gold);letter-spacing:2px">LATEST COMMITS</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px,1fr));gap:12px;font-family:var(--mono);font-size:11px;color:var(--dim);line-height:1.8">
+          <div><span style="color:var(--green)">+</span> TTS 1.7b pipeline live</div>
+          <div><span style="color:var(--green)">+</span> 100 Tool-Demo Reels</div>
+          <div><span style="color:var(--gold)">~</span> Remotion scene templates</div>
+          <div><span style="color:var(--green)">+</span> Website v1 deployed</div>
+          <div><span style="color:var(--blue)">→</span> OpenLearn v2 planned</div>
+          <div><span style="color:var(--dim)">─</span> Chatterbox TTS rejected</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="section-divider-terminal"><span class="divider-cmd">~</span> <span>EOF</span></div>
+
+<!-- ─── YOUTUBE / CONTENT ────────────────── -->
+<section id="content">
+  <div class="max-w">
+    <div class="reveal">
+      <div class="section-label">// CONTENT</div>
+      <h2 class="section-title" data-i18n="content.title">Frisch vom Kanal.</h2>
+      <p class="section-sub" data-i18n="content.sub">Jeden Tag neuer Content. Builds, Tutorials, Tool-Tests — alles auf Deutsch, alles auf echter Hardware.</p>
+    </div>
+
+    <div class="reveal">
+      <div class="yt-embed-wrap">
+        <iframe
+          src="https://www.youtube.com/embed/zqHkAyI9gwA?si=ijOnlDaE3NNzA52_"
+          title="YouTube video player"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allowfullscreen
+          loading="lazy"
+        ></iframe>
+      </div>
+    </div>
+
+    <div class="yt-grid reveal">
+      <div class="yt-thumb">
+        <div class="yt-thumb-img">
+          <div class="yt-thumb-play">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#000"><polygon points="5 3 19 12 5 21"/></svg>
+          </div>
+        </div>
+        <div class="yt-thumb-info">
+          <div class="yt-thumb-title" data-i18n="content.vid1.title">Ollama installieren — Dein erster lokaler Chat</div>
+          <div class="yt-thumb-meta">TUTORIAL · LOKAL</div>
+        </div>
+      </div>
+      <div class="yt-thumb">
+        <div class="yt-thumb-img">
+          <div class="yt-thumb-play">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#000"><polygon points="5 3 19 12 5 21"/></svg>
+          </div>
+        </div>
+        <div class="yt-thumb-info">
+          <div class="yt-thumb-title" data-i18n="content.vid2.title">n8n auf dem Raspberry Pi — Workflow Automation</div>
+          <div class="yt-thumb-meta">BUILD · SELF-HOSTED</div>
+        </div>
+      </div>
+      <div class="yt-thumb">
+        <div class="yt-thumb-img">
+          <div class="yt-thumb-play">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#000"><polygon points="5 3 19 12 5 21"/></svg>
+          </div>
+        </div>
+        <div class="yt-thumb-info">
+          <div class="yt-thumb-title" data-i18n="content.vid3.title">Text-to-Speech lokal — Qwen3-TTS auf GTX 1080</div>
+          <div class="yt-thumb-meta">DEEP DIVE · GPU</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:40px" class="reveal">
+      <a href="https://www.youtube.com/@HinskeTech" target="_blank" rel="noopener" class="btn-secondary" data-i18n="content.allvideos">
+        Alle Videos auf YouTube →
+      </a>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider-terminal"><span class="divider-cmd">~</span> <span>EOF</span></div>
+
+<!-- ─── HARDWARE ──────────────────────────── -->
+<section id="hardware">
+  <div class="max-w">
+    <div class="reveal">
+      <div class="section-label">// HARDWARE REALITY CHECK</div>
+      <h2 class="section-title" data-i18n="hw.title">Getestet auf deiner<br>Hardware.</h2>
+      <p class="section-sub" data-i18n="hw.sub">Alles was wir zeigen, läuft auf Consumer-Hardware — die du wahrscheinlich schon zuhause hast.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 380px;gap:14px;align-items:start" class="reveal hw-layout">
+      <div>
+        <div class="hw-grid">
+          <div class="hw-item">
+            <div class="hw-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="2" x2="9" y2="4"/><line x1="15" y1="2" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="22"/><line x1="15" y1="20" x2="15" y2="22"/><line x1="20" y1="9" x2="22" y2="9"/><line x1="20" y1="14" x2="22" y2="14"/><line x1="2" y1="9" x2="4" y2="9"/><line x1="2" y1="14" x2="4" y2="14"/></svg></div>
+            <div><div class="hw-name">Raspberry Pi 500</div><div class="hw-spec">8 GB RAM · ARM · CPU-only</div><div class="hw-tags"><span class="hw-tag">n8n</span><span class="hw-tag">Ollama 3B</span><span class="hw-tag">Always-On</span></div></div>
+          </div>
+          <div class="hw-item">
+            <div class="hw-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+            <div><div class="hw-name">Alter Laptop (8 GB)</div><div class="hw-spec">8 GB RAM · iGPU</div><div class="hw-tags"><span class="hw-tag">Ollama 7B Q4</span><span class="hw-tag">Whisper Small</span></div></div>
+          </div>
+          <div class="hw-item">
+            <div class="hw-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h4M6 12h2"/></svg></div>
+            <div><div class="hw-name">Gaming-PC (GTX 1060–1080)</div><div class="hw-spec">16–32 GB RAM · 6–8 GB VRAM</div><div class="hw-tags"><span class="hw-tag">bis 13B Q4</span><span class="hw-tag">Stable Diffusion</span><span class="hw-tag">Multi-Agent</span></div></div>
+          </div>
+          <div class="hw-item featured">
+            <div class="hw-icon" style="background:rgba(212,160,23,.2)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+            <div><div class="hw-name">Alienware 15 R3 — Marvins Rig</div><div class="hw-spec">32 GB RAM · GTX 1080 8 GB VRAM</div><div class="hw-tags"><span class="hw-tag" style="border-color:var(--border-g);color:var(--gold)">Qwen3-TTS</span><span class="hw-tag" style="border-color:var(--border-g);color:var(--gold)">Content Pipeline</span><span class="hw-tag" style="border-color:var(--border-g);color:var(--gold)">Alles</span></div></div>
+          </div>
+        </div>
+
+        <!-- Hardware Terminal -->
+        <div class="hw-terminal reveal" style="margin-top:14px">
+          <div class="terminal-bar"><div class="dot-r"></div><div class="dot-y"></div><div class="dot-g"></div><div class="t-title">nvidia-smi</div></div>
+          <div class="hw-terminal-body" id="hw-terminal-body"></div>
+        </div>
+      </div>
+
+      <!-- Model guide -->
+      <div class="info-card">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--gold);letter-spacing:2px;margin-bottom:22px">MODEL SIZE GUIDE</div>
+        <div class="model-row"><div class="model-label">0.5–1B</div><div class="model-bar-wrap"><div class="model-bar" data-width="8" style="background:var(--green)"></div></div><div class="model-use" data-i18n="hw.model1">Klassifikation</div></div>
+        <div class="model-row"><div class="model-label">1.7–3B</div><div class="model-bar-wrap"><div class="model-bar" data-width="25" style="background:var(--green)"></div></div><div class="model-use" data-i18n="hw.model2">Routing / TTS</div></div>
+        <div class="model-row"><div class="model-label">3–7B</div><div class="model-bar-wrap"><div class="model-bar" data-width="55" style="background:var(--gold)"></div></div><div class="model-use" data-i18n="hw.model3">Chat / Code</div></div>
+        <div class="model-row"><div class="model-label">7–14B</div><div class="model-bar-wrap"><div class="model-bar" data-width="78" style="background:var(--gold)"></div></div><div class="model-use" data-i18n="hw.model4">RAG / Reasoning</div></div>
+        <div class="model-row"><div class="model-label">30B+</div><div class="model-bar-wrap"><div class="model-bar" data-width="100" style="background:var(--blue)"></div></div><div class="model-use" data-i18n="hw.model5">GPU-Server nötig</div></div>
+
+        <div style="height:1px;background:var(--border);margin:24px 0"></div>
+
+        <div style="font-family:var(--mono);font-size:10px;color:var(--gold);letter-spacing:2px;margin-bottom:16px">SWEET SPOT</div>
+        <div style="display:flex;gap:20px">
+          <div><div style="font-size:36px;font-weight:900;letter-spacing:-1.5px"><span class="stat-gold">3</span><span style="color:var(--sub)">–</span><span>14</span><span style="font-size:16px;color:var(--dim)">B</span></div><div style="font-size:12px;color:var(--sub);margin-top:2px" data-i18n="hw.sweet1">GTX 1080 Range</div></div>
+          <div style="width:1px;background:var(--border)"></div>
+          <div><div style="font-size:36px;font-weight:900;letter-spacing:-1.5px"><span style="color:var(--gold)">Q4</span></div><div style="font-size:12px;color:var(--sub);margin-top:2px" data-i18n="hw.sweet2">Quantisierung</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider-terminal"><span class="divider-cmd">~</span> <span>EOF</span></div>
+
+<!-- ─── SOCIAL ───────────────────────────── -->
+<section id="social">
+  <div class="max-w">
+    <div class="reveal">
+      <div class="section-label">// CONNECT</div>
+      <h2 class="section-title" data-i18n="social.title">Überall dabei.</h2>
+      <p class="section-sub" data-i18n="social.sub">Folge Hinske.Tech auf allen Plattformen. Builds, Updates, Behind-the-Scenes.</p>
+    </div>
+
+    <div class="social-grid reveal">
+      <a href="https://www.youtube.com/@HinskeTech" target="_blank" rel="noopener" class="social-card yt">
+        <div class="social-card-icon">
+          <svg viewBox="0 0 24 24" fill="var(--gold)"><path d="M23.5 6.2a3 3 0 00-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 00.5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 002.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 002.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98" fill="#09090b"/></svg>
+        </div>
+        <div class="social-card-name">YouTube</div>
+        <div class="social-card-handle">@HinskeTech</div>
+        <div class="social-card-cta" data-i18n="social.cta.yt">Kanal ansehen →</div>
+      </a>
+
+      <a href="https://www.instagram.com/hinske.tech" target="_blank" rel="noopener" class="social-card ig">
+        <div class="social-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="var(--gold)" stroke="none"/></svg>
+        </div>
+        <div class="social-card-name">Instagram</div>
+        <div class="social-card-handle">@hinske.tech</div>
+        <div class="social-card-cta" data-i18n="social.cta.ig">Folgen →</div>
+      </a>
+
+      <a href="https://www.tiktok.com/@hinsketech?is_from_webapp=1&sender_device=pc" target="_blank" rel="noopener" class="social-card tt">
+        <div class="social-card-icon">
+          <svg viewBox="0 0 24 24" fill="var(--gold)"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 00-.79-.05A6.34 6.34 0 003.15 15.2a6.34 6.34 0 0010.86 4.44V13a8.17 8.17 0 005.58 2.18V11.7a4.83 4.83 0 01-3.77-1.24V6.69z"/></svg>
+        </div>
+        <div class="social-card-name">TikTok</div>
+        <div class="social-card-handle">@hinske.tech</div>
+        <div class="social-card-cta" data-i18n="social.cta.tt">Folgen →</div>
+      </a>
+
+      <a href="https://www.linkedin.com/in/marvin-hinske-423291339" target="_blank" rel="noopener" class="social-card li">
+        <div class="social-card-icon">
+          <svg viewBox="0 0 24 24" fill="var(--gold)"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.36V9h3.41v1.56h.05a3.74 3.74 0 013.37-1.85c3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 11.01-4.13 2.06 2.06 0 01-.01 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77A1.75 1.75 0 000 1.73v20.54A1.75 1.75 0 001.77 24h20.45A1.75 1.75 0 0024 22.27V1.73A1.75 1.75 0 0022.22 0z"/></svg>
+        </div>
+        <div class="social-card-name">LinkedIn</div>
+        <div class="social-card-handle">Marvin Hinske</div>
+        <div class="social-card-cta" data-i18n="social.cta.li">Vernetzen →</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider-terminal"><span class="divider-cmd">~</span> <span>EOF</span></div>
+
+<!-- ─── CTA ───────────────────────────────── -->
+<section class="cta-section" id="cta">
+  <div class="cta-card reveal">
+    <div class="cta-card-bg"></div>
+    <img src="assets/hinske-text.png" alt="Hinske.Tech" style="height:44px;width:auto;object-fit:contain;margin:0 auto 24px;display:block;filter:drop-shadow(0 0 16px rgba(212,160,23,.3))" loading="lazy">
+    <div style="font-family:var(--mono);font-size:10px;color:var(--gold);letter-spacing:3px;margin-bottom:20px;position:relative">// JETZT STARTEN</div>
+    <h2 class="cta-title" data-i18n="cta.title">AI auf deiner Hardware — heute.</h2>
+    <p class="cta-sub" data-i18n="cta.sub">Abonniere und baue dein erstes lokales AI-System in weniger als 10 Minuten nach. Keine Cloud. Keine Kosten.</p>
+    <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;position:relative">
+      <a href="https://www.youtube.com/@HinskeTech" target="_blank" rel="noopener" class="yt-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 00-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 00.5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 002.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 002.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>
+        <span data-i18n="cta.btn">Jetzt abonnieren</span>
+      </a>
+    </div>
+    <div style="margin-top:32px;display:flex;gap:28px;justify-content:center;flex-wrap:wrap;position:relative">
+      <div style="text-align:center"><div style="font-size:22px;font-weight:800;color:var(--gold)">100%</div><div style="font-size:11px;color:var(--sub)" data-i18n="cta.stat1">Kostenlos</div></div>
+      <div style="width:1px;background:var(--border)"></div>
+      <div style="text-align:center"><div style="font-size:22px;font-weight:800;color:var(--gold)">DE</div><div style="font-size:11px;color:var(--sub)" data-i18n="cta.stat2">Auf Deutsch</div></div>
+      <div style="width:1px;background:var(--border)"></div>
+      <div style="text-align:center"><div style="font-size:22px;font-weight:800;color:var(--gold)">7×</div><div style="font-size:11px;color:var(--sub)" data-i18n="cta.stat3">Pro Woche</div></div>
+      <div style="width:1px;background:var(--border)"></div>
+      <div style="text-align:center"><div style="font-size:22px;font-weight:800;color:var(--gold)">Open</div><div style="font-size:11px;color:var(--sub)">Source</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER ────────────────────────────── -->
+<footer>
+  <div class="footer-terminal">&gt;_ HINSKE.TECH</div>
+  <div class="footer-tagline">AI für alle. Kostenlos. Lokal. Auf echter Hardware.</div>
+  <div class="footer-links">
+    <a href="https://www.youtube.com/@HinskeTech" target="_blank" rel="noopener">YouTube</a>
+    <a href="https://www.instagram.com/hinsketech" target="_blank" rel="noopener">Instagram</a>
+    <a href="https://www.tiktok.com/@hinsketech?is_from_webapp=1&sender_device=pc" target="_blank" rel="noopener">TikTok</a>
+    <a href="https://www.linkedin.com/in/marvin-hinske-423291339" target="_blank" rel="noopener">LinkedIn</a>
+  </div>
+  <div class="footer-divider"></div>
+  <div class="footer-links">
+    <a href="impressum.html">Impressum</a>
+    <a href="datenschutz.html">Datenschutz</a>
+    <a href="nutzungsbedingungen.html">Nutzungsbedingungen</a>
+  </div>
+  <div class="footer-copy">© 2026 HINSKE.TECH — OPEN SOURCE FIRST</div>
+</footer>
+
+<!-- ─── STATUS TICKER ────────────────────── -->
+<div id="status-ticker">
+  <div class="ticker-fixed">
+    <span class="ticker-led"></span>
+    <span>HINSKE.TECH</span>
+    <span style="color:var(--green)">ONLINE</span>
+  </div>
+  <div class="ticker-scroll">
+    <div class="ticker-track" id="ticker-track">
+      <span><span class="t-green">✓</span> GPU: GTX 1080 — <span class="t-gold">3.95 GB / 8 GB</span> VRAM</span>
+      <span><span class="t-green">✓</span> RAM: <span class="t-gold">20 / 32 GB</span> DDR4</span>
+      <span><span class="t-green">✓</span> n8n: self-hosted — <span class="t-green">uptime 99.8%</span></span>
+      <span><span class="t-green">✓</span> TTS: Qwen3-1.7B — <span class="t-gold">x_vector_only</span></span>
+      <span><span class="t-green">✓</span> Pipeline: <span class="t-green">4/4 Kurse gerendert</span></span>
+      <span><span class="t-green">✓</span> Reels: <span class="t-gold">100 Tool-Demos</span></span>
+      <span>OS: Linux 6.17 · CUDA 12.2 · Python 3.12 · Node 20</span>
+      <span>PID: 1337 · TTY: pts/0 · SHLVL: 2</span>
+      <!-- Duplicate for seamless scroll -->
+      <span><span class="t-green">✓</span> GPU: GTX 1080 — <span class="t-gold">3.95 GB / 8 GB</span> VRAM</span>
+      <span><span class="t-green">✓</span> RAM: <span class="t-gold">20 / 32 GB</span> DDR4</span>
+      <span><span class="t-green">✓</span> n8n: self-hosted — <span class="t-green">uptime 99.8%</span></span>
+      <span><span class="t-green">✓</span> TTS: Qwen3-1.7B — <span class="t-gold">x_vector_only</span></span>
+      <span><span class="t-green">✓</span> Pipeline: <span class="t-green">4/4 Kurse gerendert</span></span>
+      <span><span class="t-green">✓</span> Reels: <span class="t-gold">100 Tool-Demos</span></span>
+      <span>OS: Linux 6.17 · CUDA 12.2 · Python 3.12 · Node 20</span>
+      <span>PID: 1337 · TTY: pts/0 · SHLVL: 2</span>
+    </div>
+  </div>
+</div>
+
+<!-- ─── SCRIPTS ────────────────────────────── -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ═══════════════════════════════════════════
+   i18n — LANGUAGE TOGGLE
+══════════════════════════════════════════ */
+const i18n = {
+  en: {
+    'nav.mission': 'Mission',
+    'nav.builds': 'Builds',
+    'nav.hardware': 'Hardware',
+    'nav.social': 'Social',
+    'hero.title1': 'Real AI.',
+    'hero.title2': 'On real ',
+    'hero.title3': 'Hardware.',
+    'hero.sub': 'Hinske.Tech shows what\'s possible with open-source AI on normal consumer hardware — completely free, in German.',
+    'hero.pill1': 'No Cloud Subscriptions',
+    'hero.pill2': 'Instantly Reproducible',
+    'hero.pill3': 'Daily New Content',
+    'hero.pill4': '100% Free',
+    'hero.cta1': 'YouTube Channel',
+    'hero.cta2': 'Learn More',
+    'hero.scroll': 'SCROLL',
+    'mission.title': 'Why Hinske.Tech<br>is different.',
+    'mission.sub': 'No marketing BS. No expensive subscriptions. Just real projects on real hardware.',
+    'mission.card1.title': 'Everything Free & Open Source',
+    'mission.card1.body': 'Not a single tool that requires a subscription. We always show the free alternative. Always.',
+    'mission.card2.title': 'Real Hardware Testing',
+    'mission.card2.body': 'GTX 1080, Raspberry Pi, old laptop. We test on what you have at home — not on A100 servers.',
+    'mission.card3.title': 'In German',
+    'mission.card3.body': 'The German-speaking AI community deserves its own high-quality content. No translated US stuff.',
+    'mission.card4.title': 'No Subscriptions, No BS',
+    'mission.card4.body': 'If a tool is bad, we say so. No sponsored praise, no clickbait, no paywall.',
+    'mission.stat1': 'Local model range',
+    'mission.stat2': 'Free',
+    'mission.stat4': 'In German',
+    'builds.title': 'What\'s being<br>built right now.',
+    'builds.sub': 'Real projects. Real code. On real hardware. No staging, no pretend.',
+    'builds.tts.body': 'Local text-to-speech on GTX 1080. 1.7B parameters, x_vector voice cloning, chunked generation. Fully automated as part of the content pipeline.',
+    'builds.pipeline.body': 'Fully automated: Script → TTS → Remotion → ffmpeg → MP4. Four courses, 100 reels, all rendered locally.',
+    'builds.n8n.body': 'Self-hosted on Raspberry Pi. systemd autostart. Runs 24/7 without cloud, without subscription.',
+    'builds.website.title': 'This Website',
+    'builds.website.body': 'You\'re looking at it. Pure HTML/CSS/JS. Three.js particles, custom cursor, circuit-board spotlight. No framework.',
+    'content.title': 'Fresh from the channel.',
+    'content.sub': 'New content every day. Builds, tutorials, tool tests — all in German, all on real hardware.',
+    'content.vid1.title': 'Install Ollama — Your First Local Chat',
+    'content.vid2.title': 'n8n on Raspberry Pi — Workflow Automation',
+    'content.vid3.title': 'Local TTS — Qwen3-TTS on GTX 1080',
+    'content.allvideos': 'All Videos on YouTube →',
+    'hw.title': 'Tested on your<br>hardware.',
+    'hw.sub': 'Everything we show runs on consumer hardware — you probably already have at home.',
+    'hw.model1': 'Classification',
+    'hw.model2': 'Routing / TTS',
+    'hw.model3': 'Chat / Code',
+    'hw.model4': 'RAG / Reasoning',
+    'hw.model5': 'GPU server needed',
+    'hw.sweet1': 'GTX 1080 Range',
+    'hw.sweet2': 'Quantization',
+    'social.title': 'Everywhere.',
+    'social.sub': 'Follow Hinske.Tech on all platforms. Builds, updates, behind-the-scenes.',
+    'social.cta.yt': 'Visit Channel →',
+    'social.cta.ig': 'Follow →',
+    'social.cta.tt': 'Follow →',
+    'social.cta.li': 'Connect →',
+    'cta.title': 'AI on your hardware — today.',
+    'cta.sub': 'Subscribe and build your first local AI system in less than 10 minutes. No cloud. No cost.',
+    'cta.btn': 'Subscribe Now',
+    'cta.stat1': 'Free',
+    'cta.stat2': 'In German',
+    'cta.stat3': 'Per Week',
+  },
+  de: {} // defaults = HTML content
+};
+
+let currentLang = 'de';
+const originals = {};
+
+// Store original DE text
+document.querySelectorAll('[data-i18n]').forEach(el => {
+  originals[el.dataset.i18n] = el.innerHTML;
+});
+
+function setLang(lang) {
+  currentLang = lang;
+  document.documentElement.lang = lang;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if (lang === 'en' && i18n.en[key]) {
+      el.innerHTML = i18n.en[key];
+    } else {
+      el.innerHTML = originals[key];
+    }
+    // Update glitch data-text attribute
+    if (el.classList.contains('glitch')) {
+      el.dataset.text = el.textContent;
+    }
+  });
+}
+
+document.querySelectorAll('.lang-btn').forEach(btn => {
+  btn.addEventListener('click', () => setLang(btn.dataset.lang));
+});
+
+/* ═══════════════════════════════════════════
+   CIRCUIT SPOTLIGHT
+══════════════════════════════════════════ */
+const spotlight = document.getElementById('circuit-spotlight');
+document.addEventListener('mousemove', e => {
+  spotlight.style.background = `radial-gradient(600px circle at ${e.clientX}px ${e.clientY}px,
+    rgba(9,9,11,0) 0%,
+    rgba(9,9,11,0.72) 38%,
+    rgba(9,9,11,0.97) 68%
+  )`;
+});
+
+/* ═══════════════════════════════════════════
+   CUSTOM CURSOR
+══════════════════════════════════════════ */
+const cur = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+let cx = 0, cy = 0, rx = 0, ry = 0;
+
+document.addEventListener('mousemove', e => {
+  cx = e.clientX; cy = e.clientY;
+  cur.style.left = cx+'px'; cur.style.top = cy+'px';
+});
+
+function animRing() {
+  rx += (cx - rx) * 0.12;
+  ry += (cy - ry) * 0.12;
+  ring.style.left = rx+'px'; ring.style.top = ry+'px';
+  requestAnimationFrame(animRing);
+}
+animRing();
+
+function setupCursorHovers() {
+  document.querySelectorAll('a, button, .bento-card, .hw-item, .pill, .social-card, .yt-thumb').forEach(el => {
+    el.addEventListener('mouseenter', () => { cur.classList.add('hover'); ring.classList.add('hover'); });
+    el.addEventListener('mouseleave', () => { cur.classList.remove('hover'); ring.classList.remove('hover'); });
+  });
+}
+setupCursorHovers();
+
+/* ═══════════════════════════════════════════
+   THREE.JS HERO PARTICLES
+══════════════════════════════════════════ */
+(function() {
+  const canvas = document.getElementById('hero-canvas');
+  if (!canvas) return;
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setClearColor(0, 0);
+
+  const scene = new THREE.Scene();
+  const cam = new THREE.PerspectiveCamera(60, 1, .1, 1000);
+  cam.position.z = 5;
+
+  function resize() {
+    const w = canvas.offsetWidth, h = canvas.offsetHeight;
+    renderer.setSize(w, h, false);
+    cam.aspect = w / h; cam.updateProjectionMatrix();
+  }
+  resize(); window.addEventListener('resize', resize);
+
+  const N = 1800;
+  const geo = new THREE.BufferGeometry();
+  const pos = new Float32Array(N * 3);
+  const sz = new Float32Array(N);
+  const col = new Float32Array(N * 3);
+  const vel = new Float32Array(N * 3); // velocities for mouse interaction
+  const gold = new THREE.Color('#d4a017');
+  const goldL = new THREE.Color('#f5c842');
+  const dim = new THREE.Color('#27272a');
+  const blue = new THREE.Color('#3b82f6');
+
+  for (let i = 0; i < N; i++) {
+    pos[i * 3] = (Math.random() - .5) * 24;
+    pos[i * 3 + 1] = (Math.random() - .5) * 16;
+    pos[i * 3 + 2] = (Math.random() - .5) * 12 - 2;
+    sz[i] = Math.random() * 3 + .5;
+    vel[i * 3] = vel[i * 3 + 1] = vel[i * 3 + 2] = 0;
+    const r = Math.random();
+    const c = r < .12 ? gold : r < .18 ? goldL : r < .24 ? blue : dim;
+    col[i * 3] = c.r; col[i * 3 + 1] = c.g; col[i * 3 + 2] = c.b;
+  }
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute('size', new THREE.BufferAttribute(sz, 1));
+  geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+
+  const mat = new THREE.ShaderMaterial({
+    vertexColors: true, transparent: true,
+    uniforms: { time: { value: 0 }, mouse: { value: new THREE.Vector2(0, 0) } },
+    vertexShader: `
+      attribute float size; attribute vec3 color;
+      varying vec3 vCol; varying float vDist;
+      uniform float time; uniform vec2 mouse;
+      void main(){
+        vCol = color;
+        vec3 p = position;
+        p.y += sin(time*.25+position.x*.6)*0.08;
+        p.x += cos(time*.18+position.z*.5)*0.06;
+        float dist = distance(p.xy, mouse * 5.0);
+        vDist = dist;
+        if(dist < 2.0) {
+          vec2 dir = normalize(p.xy - mouse * 5.0);
+          p.xy += dir * (2.0 - dist) * 0.3;
+        }
+        vec4 mv = modelViewMatrix*vec4(p,1.);
+        gl_Position = projectionMatrix*mv;
+        gl_PointSize = size*(320./-mv.z);
+      }`,
+    fragmentShader: `
+      varying vec3 vCol; varying float vDist;
+      void main(){
+        float d = distance(gl_PointCoord,vec2(.5));
+        if(d>.5) discard;
+        float a = 1.-smoothstep(.1,.5,d);
+        float glow = vDist < 2.0 ? 1.0 : 0.65;
+        gl_FragColor = vec4(vCol, a*glow);
+      }`
+  });
+
+  const pts = new THREE.Points(geo, mat);
+  scene.add(pts);
+
+  // Tech rings
+  for (let i = 0; i < 3; i++) {
+    const r = 2.5 + i * 1.4;
+    const ringGeo = new THREE.RingGeometry(r - .5, r - .48, 80);
+    const ringMat = new THREE.MeshBasicMaterial({
+      color: i === 0 ? 0xd4a017 : 0x27272a,
+      transparent: true, opacity: i === 0 ? .15 : .06,
+      side: THREE.DoubleSide
+    });
+    const ring3d = new THREE.Mesh(ringGeo, ringMat);
+    ring3d.rotation.x = Math.PI / 3 + i * .3;
+    ring3d.position.z = -3;
+    ring3d.userData.speed = (i + 1) * 0.003;
+    scene.add(ring3d);
+  }
+
+  let mx = 0, my = 0;
+  document.addEventListener('mousemove', e => {
+    mx = (e.clientX / innerWidth - .5) * 2;
+    my = (e.clientY / innerHeight - .5) * 2;
+  });
+
+  let t = 0;
+  function anim() {
+    requestAnimationFrame(anim);
+    t += .016;
+    mat.uniforms.time.value = t;
+    mat.uniforms.mouse.value.set(mx, -my);
+    pts.rotation.y = mx * .06 + t * .008;
+    pts.rotation.x = -my * .04;
+    cam.position.x += (mx * .25 - cam.position.x) * .05;
+    cam.position.y += (-my * .18 - cam.position.y) * .05;
+    scene.children.filter(c => c instanceof THREE.Mesh).forEach(r => {
+      r.rotation.z += r.userData.speed || .002;
+    });
+    renderer.render(scene, cam);
+  }
+  anim();
+})();
+
+/* ═══════════════════════════════════════════
+   HERO BG PARALLAX
+══════════════════════════════════════════ */
+const heroBg = document.getElementById('hero-bg');
+document.addEventListener('mousemove', e => {
+  if (!heroBg) return;
+  const x = (e.clientX / innerWidth - .5) * 8;
+  const y = (e.clientY / innerHeight - .5) * 6;
+  heroBg.style.transform = `scale(1.08) translate(${x}px,${y}px)`;
+});
+
+/* ═══════════════════════════════════════════
+   BENTO CARD 3D TILT
+══════════════════════════════════════════ */
+document.querySelectorAll('[data-tilt]').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const r = card.getBoundingClientRect();
+    const x = e.clientX - r.left, y = e.clientY - r.top;
+    const cx2 = r.width / 2, cy2 = r.height / 2;
+    const rotX = ((y - cy2) / cy2) * -6;
+    const rotY = ((x - cx2) / cx2) * 6;
+    card.style.transform = `perspective(900px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateZ(8px)`;
+    const glow = card.querySelector('.glow');
+    if (glow) { glow.style.setProperty('--mx', x + 'px'); glow.style.setProperty('--my', y + 'px'); }
+  });
+  card.addEventListener('mouseleave', () => {
+    card.style.transform = '';
+    card.style.transition = 'transform .5s cubic-bezier(.25,.46,.45,.94)';
+    setTimeout(() => card.style.transition = '', 500);
+  });
+});
+
+/* ═══════════════════════════════════════════
+   LIVE TYPEWRITER TERMINAL
+══════════════════════════════════════════ */
+const termEl = document.getElementById('live-terminal');
+const termLines = [
+  { type: 'prompt', text: 'ollama pull llama3.2:3b' },
+  { type: 'out', text: 'pulling manifest...' },
+  { type: 'out', text: '████████████░░░░  78% — 2.1 GB / 2.6 GB' },
+  { type: 'out', text: '✓ success — model ready', color: '#22c55e' },
+  { type: 'prompt', text: 'ollama run llama3.2:3b' },
+  { type: 'out', text: '>>> Hallo! Ich bin bereit. Was möchtest du bauen?', color: '#d4a017' },
+  { type: 'prompt', text: '', cursor: true },
+];
+
+async function typeTerminal() {
+  if (!termEl) return;
+  termEl.innerHTML = '';
+  for (const l of termLines) {
+    await new Promise(r => setTimeout(r, 400));
+    const div = document.createElement('div');
+    div.className = 't-line';
+    if (l.type === 'prompt') {
+      div.innerHTML = `<span class="t-prompt">❯ </span><span class="t-cmd"></span>${l.cursor ? '<span class="t-cursor"></span>' : ''}`;
+      termEl.appendChild(div);
+      if (l.text) {
+        const target = div.querySelector('.t-cmd');
+        for (const ch of l.text) {
+          target.textContent += ch;
+          await new Promise(r => setTimeout(r, 35));
+        }
+      }
+    } else {
+      div.innerHTML = `<span style="color:${l.color || '#52525b'}">${l.text}</span>`;
+      termEl.appendChild(div);
+    }
+    termEl.scrollTop = termEl.scrollHeight;
+  }
+  // Loop after a pause
+  setTimeout(typeTerminal, 4000);
+}
+
+/* ═══════════════════════════════════════════
+   HARDWARE TERMINAL (nvidia-smi style)
+══════════════════════════════════════════ */
+const hwTermEl = document.getElementById('hw-terminal-body');
+const hwLines = [
+  { text: '+-------------------------------+', color: '#52525b' },
+  { text: '| NVIDIA GeForce GTX 1080       |', color: '#fafafa' },
+  { text: '| Driver: 535.183.01  CUDA 12.2 |', color: '#52525b' },
+  { text: '+-------------------------------+', color: '#52525b' },
+  { text: '| Temp: 62°C    Fan: 45%        |', color: '#22c55e' },
+  { text: '| VRAM: 3.95G / 8.00G (49%)     |', color: '#d4a017' },
+  { text: '| Power: 120W / 180W            |', color: '#52525b' },
+  { text: '+-------------------------------+', color: '#52525b' },
+  { text: '| Process: qwen3-tts-1.7b       |', color: '#d4a017' },
+  { text: '+-------------------------------+', color: '#52525b' },
+];
+
+async function typeHwTerminal() {
+  if (!hwTermEl) return;
+  hwTermEl.innerHTML = '';
+  for (const l of hwLines) {
+    await new Promise(r => setTimeout(r, 80));
+    const div = document.createElement('div');
+    div.className = 't-line';
+    div.innerHTML = `<span style="color:${l.color}">${l.text}</span>`;
+    hwTermEl.appendChild(div);
+  }
+}
+
+/* ═══════════════════════════════════════════
+   COUNTER ANIMATION
+══════════════════════════════════════════ */
+function animCounter(el) {
+  const target = parseInt(el.dataset.target);
+  const duration = 1600;
+  const start = performance.now();
+  function update(now) {
+    const p = Math.min((now - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(ease * target);
+    if (p < 1) requestAnimationFrame(update);
+    else el.textContent = target;
+  }
+  requestAnimationFrame(update);
+}
+
+/* ═══════════════════════════════════════════
+   SCROLL REVEAL + TRIGGERS
+══════════════════════════════════════════ */
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    e.target.classList.add('visible');
+    e.target.querySelectorAll('.counter').forEach(c => animCounter(c));
+    e.target.querySelectorAll('.pb-bar, .model-bar').forEach(b => {
+      setTimeout(() => b.style.width = b.dataset.width + '%', 200);
+    });
+    io.unobserve(e.target);
+  });
+}, { threshold: 0.15 });
+
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+// Also trigger bars in non-reveal sections
+const ioBar = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    e.target.querySelectorAll('.pb-bar, .model-bar').forEach(b => {
+      setTimeout(() => b.style.width = b.dataset.width + '%', 300);
+    });
+    e.target.querySelectorAll('.counter').forEach(c => animCounter(c));
+    ioBar.unobserve(e.target);
+  });
+}, { threshold: 0.2 });
+document.querySelectorAll('.bento-card, .info-card').forEach(el => ioBar.observe(el));
+
+/* ═══════════════════════════════════════════
+   TERMINAL AUTO-START ON VISIBLE
+══════════════════════════════════════════ */
+const termObserver = new IntersectionObserver(entries => {
+  if (entries[0].isIntersecting) { typeTerminal(); termObserver.disconnect(); }
+}, { threshold: .3 });
+if (termEl) termObserver.observe(termEl.closest('.bento-card'));
+
+const hwTermObserver = new IntersectionObserver(entries => {
+  if (entries[0].isIntersecting) { typeHwTerminal(); hwTermObserver.disconnect(); }
+}, { threshold: .3 });
+if (hwTermEl) hwTermObserver.observe(hwTermEl.closest('.hw-terminal'));
+
+/* ═══════════════════════════════════════════
+   EMP SHOCKWAVE ON CLICK
+══════════════════════════════════════════ */
+document.addEventListener('click', e => {
+  const x = e.clientX, y = e.clientY;
+
+  // Primary EMP wave ring
+  const wave = document.createElement('div');
+  wave.className = 'emp-wave';
+  wave.style.cssText = `left:${x}px;top:${y}px;--emp-size:350px;--emp-dur:.8s;`;
+  document.body.appendChild(wave);
+  setTimeout(() => wave.remove(), 850);
+
+  // Secondary (larger, fainter) wave
+  const wave2 = document.createElement('div');
+  wave2.className = 'emp-wave secondary';
+  wave2.style.cssText = `left:${x}px;top:${y}px;--emp-size:500px;--emp-dur:1s;`;
+  document.body.appendChild(wave2);
+  setTimeout(() => wave2.remove(), 1100);
+
+  // Screen-wide radial flash from click point
+  const flash = document.createElement('div');
+  flash.className = 'emp-flash';
+  flash.style.setProperty('--fx', x + 'px');
+  flash.style.setProperty('--fy', y + 'px');
+  document.body.appendChild(flash);
+  setTimeout(() => flash.remove(), 500);
+
+  // Horizontal scanline burst at click Y
+  const scanline = document.createElement('div');
+  scanline.className = 'emp-scanline';
+  scanline.style.top = y + 'px';
+  document.body.appendChild(scanline);
+  setTimeout(() => scanline.remove(), 650);
+
+  // "Glitch hit" nearby cards/elements within 300px radius
+  document.querySelectorAll('.bento-card, .social-card, .hw-item, .yt-thumb, .pill, .info-card').forEach(el => {
+    const rect = el.getBoundingClientRect();
+    const elCx = rect.left + rect.width / 2;
+    const elCy = rect.top + rect.height / 2;
+    const dist = Math.hypot(elCx - x, elCy - y);
+    if (dist < 300) {
+      el.classList.remove('emp-hit');
+      void el.offsetWidth; // reflow to restart animation
+      el.classList.add('emp-hit');
+      setTimeout(() => el.classList.remove('emp-hit'), 400);
+    }
+  });
+});
+
+/* ═══════════════════════════════════════════
+   GLITCH EFFECT
+══════════════════════════════════════════ */
+const glitchEl = document.querySelector('.glitch');
+let glitchTimer;
+if (glitchEl) {
+  glitchEl.addEventListener('mouseenter', () => {
+    glitchEl.classList.add('active');
+    clearTimeout(glitchTimer);
+    glitchTimer = setTimeout(() => glitchEl.classList.remove('active'), 400);
+  });
+  setInterval(() => {
+    glitchEl.classList.add('active');
+    setTimeout(() => glitchEl.classList.remove('active'), 300);
+  }, 4000);
+}
+
+/* ═══════════════════════════════════════════
+   NAV SCROLL (hide/show + background)
+══════════════════════════════════════════ */
+let lastScroll = 0;
+const navEl = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  const st = window.scrollY;
+  navEl.style.background = st > 80 ? 'rgba(9,9,11,.94)' : 'rgba(9,9,11,.7)';
+  if (st > lastScroll && st > 300) navEl.classList.add('hidden');
+  else navEl.classList.remove('hidden');
+  lastScroll = st;
+});
+
+/* ═══════════════════════════════════════════
+   MAGNETIC BUTTONS
+══════════════════════════════════════════ */
+document.querySelectorAll('.btn-primary, .nav-cta, .yt-btn').forEach(btn => {
+  btn.addEventListener('mousemove', e => {
+    const r = btn.getBoundingClientRect();
+    const x = e.clientX - r.left - r.width / 2;
+    const y = e.clientY - r.top - r.height / 2;
+    btn.style.transform = `translate(${x * .18}px, ${y * .18}px)`;
+  });
+  btn.addEventListener('mouseleave', () => { btn.style.transform = ''; });
+});
+
+/* ═══════════════════════════════════════════
+   MOBILE MENU
+══════════════════════════════════════════ */
+const hamburger = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobile-menu');
+hamburger.addEventListener('click', () => {
+  mobileMenu.classList.toggle('open');
+  const spans = hamburger.querySelectorAll('span');
+  if (mobileMenu.classList.contains('open')) {
+    spans[0].style.transform = 'rotate(45deg) translate(5px, 5px)';
+    spans[1].style.opacity = '0';
+    spans[2].style.transform = 'rotate(-45deg) translate(5px, -5px)';
+  } else {
+    spans[0].style.transform = '';
+    spans[1].style.opacity = '1';
+    spans[2].style.transform = '';
+  }
+});
+mobileMenu.querySelectorAll('a').forEach(a => {
+  a.addEventListener('click', () => {
+    mobileMenu.classList.remove('open');
+    hamburger.querySelectorAll('span').forEach(s => { s.style.transform = ''; s.style.opacity = '1'; });
+  });
+});
+
+/* ═══════════════════════════════════════════
+   PARALLAX ON SCROLL
+══════════════════════════════════════════ */
+window.addEventListener('scroll', () => {
+  const scrolled = window.scrollY;
+  // Parallax on section labels
+  document.querySelectorAll('.section-label').forEach(el => {
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      el.style.transform = `translateX(${(scrolled - el.offsetTop) * 0.02}px)`;
+    }
+  });
+});
+
+/* ═══════════════════════════════════════════
+   SMOOTH SCROLL FOR NAV LINKS
+══════════════════════════════════════════ */
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) {
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+
+/* ═══════════════════════════════════════════
+   BOOT SEQUENCE
+══════════════════════════════════════════ */
+(function() {
+  const overlay = document.getElementById('boot-overlay');
+  const log = document.getElementById('boot-log');
+  const bar = document.getElementById('boot-progress-bar');
+  if (!overlay || !log) return;
+
+  const lines = [
+    { text: '[BIOS] Hinske.Tech Bootloader v2.6.0', cls: 'boot-dim', delay: 250 },
+    { text: '[INIT] Loading kernel modules...', cls: 'boot-dim', delay: 200 },
+    { text: '[  OK  ] GPU detected: NVIDIA GTX 1080 (8 GB VRAM)', cls: 'boot-ok', delay: 220 },
+    { text: '[  OK  ] RAM: 32 GB DDR4 @ 2400 MHz', cls: 'boot-ok', delay: 180 },
+    { text: '[  OK  ] CUDA 12.2 initialized', cls: 'boot-ok', delay: 180 },
+    { text: '[LOAD ] Mounting /dev/creativity...', cls: 'boot-dim', delay: 350 },
+    { text: '[  OK  ] Ollama service started (llama3.2:3b)', cls: 'boot-ok', delay: 240 },
+    { text: '[  OK  ] n8n automation daemon: active', cls: 'boot-ok', delay: 180 },
+    { text: '[  OK  ] Qwen3-TTS 1.7B: loaded (3.95 GB VRAM)', cls: 'boot-gold', delay: 280 },
+    { text: '[  OK  ] Content pipeline: armed', cls: 'boot-ok', delay: 200 },
+    { text: '', cls: 'boot-dim', delay: 300 },
+    { text: '[READY] All systems operational.', cls: 'boot-gold', delay: 400 },
+    { text: '', cls: 'boot-dim', delay: 250 },
+    { text: '> hinske.tech --start --mode=playground', cls: 'boot-white', delay: 500 },
+  ];
+
+  const crtLine = document.getElementById('crt-line');
+  const crtFlash = document.getElementById('crt-flash');
+
+  function crtTransition() {
+    bar.style.width = '100%';
+
+    // Phase 1: Hold the final line visible, then fade out text
+    setTimeout(() => {
+      log.style.transition = 'opacity .4s ease-out';
+      log.style.opacity = '0';
+    }, 600);
+
+    // Phase 2: Boot text gone, screen collapses to horizontal line
+    setTimeout(() => {
+      overlay.style.transition = 'height .6s cubic-bezier(.4,0,1,1), top .6s cubic-bezier(.4,0,1,1)';
+      overlay.style.height = '2px';
+      overlay.style.top = 'calc(50vh - 1px)';
+      overlay.style.overflow = 'hidden';
+      overlay.querySelector('#boot-progress').style.display = 'none';
+    }, 1200);
+
+    // Phase 3: Gold CRT line expands and fills screen
+    setTimeout(() => {
+      crtLine.style.animation = 'crtLineExpand 1.2s cubic-bezier(.25,.46,.45,.94) forwards';
+    }, 2000);
+
+    // Phase 4: Flash + scanline intensification
+    setTimeout(() => {
+      crtFlash.style.animation = 'crtFlash .6s ease forwards';
+      const scanlines = document.getElementById('scanlines');
+      if (scanlines) {
+        scanlines.style.transition = 'opacity .5s';
+        scanlines.style.opacity = '1';
+        setTimeout(() => { scanlines.style.opacity = ''; scanlines.style.transition = ''; }, 600);
+      }
+    }, 2800);
+
+    // Phase 5: Clean up, reveal page
+    setTimeout(() => {
+      overlay.style.display = 'none';
+      crtLine.style.display = 'none';
+      crtFlash.style.display = 'none';
+      document.body.style.overflow = '';
+      overlay.remove();
+      crtLine.remove();
+      crtFlash.remove();
+    }, 3500);
+  }
+
+  let idx = 0;
+  function addLine() {
+    if (idx >= lines.length) {
+      crtTransition();
+      return;
+    }
+    const l = lines[idx];
+    const div = document.createElement('div');
+    div.className = 'boot-line ' + l.cls;
+    div.textContent = l.text;
+    div.style.animationDelay = '0s';
+    log.appendChild(div);
+    bar.style.width = ((idx + 1) / lines.length * 100) + '%';
+    log.scrollTop = log.scrollHeight;
+    idx++;
+    setTimeout(addLine, l.delay);
+  }
+
+  document.body.style.overflow = 'hidden';
+  setTimeout(addLine, 600);
+})();
+
+/* ═══════════════════════════════════════════
+   MATRIX CODE RAIN
+══════════════════════════════════════════ */
+(function() {
+  const canvas = document.getElementById('matrix-rain');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン{}[]<>/\\|=+-_*&^%$#@!?;:,.~`';
+  const fontSize = 12;
+  let columns = Math.floor(canvas.width / fontSize);
+  let drops = Array(columns).fill(1);
+
+  window.addEventListener('resize', () => {
+    columns = Math.floor(canvas.width / fontSize);
+    drops = Array(columns).fill(1);
+  });
+
+  function draw() {
+    ctx.fillStyle = 'rgba(9, 9, 11, 0.05)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#d4a01720';
+    ctx.font = fontSize + 'px JetBrains Mono, monospace';
+
+    for (let i = 0; i < drops.length; i++) {
+      const char = chars[Math.floor(Math.random() * chars.length)];
+      ctx.fillText(char, i * fontSize, drops[i] * fontSize);
+      if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+        drops[i] = 0;
+      }
+      drops[i]++;
+    }
+  }
+
+  setInterval(draw, 50);
+})();
+
+/* ═══════════════════════════════════════════
+   HERO SUBTITLE TYPING EFFECT
+══════════════════════════════════════════ */
+(function() {
+  const subEl = document.querySelector('#hero-sub-type [data-i18n]');
+  const cursorEl = document.getElementById('hero-cursor');
+  if (!subEl || !cursorEl) return;
+
+  const fullText = subEl.textContent;
+  subEl.textContent = '';
+  cursorEl.style.display = 'inline-block';
+
+  let charIdx = 0;
+  function typeChar() {
+    if (charIdx < fullText.length) {
+      subEl.textContent += fullText[charIdx];
+      charIdx++;
+      setTimeout(typeChar, 20 + Math.random() * 15);
+    } else {
+      // Hide cursor after typing done
+      setTimeout(() => { cursorEl.style.display = 'none'; }, 2000);
+    }
+  }
+
+  // Start after boot sequence + CRT transition (~7.5s)
+  setTimeout(typeChar, 7500);
+})();
+
+/* ═══════════════════════════════════════════
+   STATUS TICKER — LIVE CLOCK
+══════════════════════════════════════════ */
+(function() {
+  const fixed = document.querySelector('#status-ticker .ticker-fixed');
+  if (!fixed) return;
+  const clockSpan = document.createElement('span');
+  clockSpan.style.color = 'var(--sub)';
+  fixed.appendChild(clockSpan);
+
+  function updateClock() {
+    const now = new Date();
+    clockSpan.textContent = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+})();
+</script>
+</body>
+</html>
