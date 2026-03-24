@@ -829,34 +829,80 @@ footer {
   section { padding: 80px 24px; }
 }
 @media (max-width: 768px) {
-  nav { padding: 0 20px; }
+  nav { padding: 0 16px; height: 56px; }
   .nav-links { display: none; }
   .lang-toggle { display: none; }
   .nav-hamburger { display: flex; }
   .mobile-menu .lang-toggle-mobile { display: flex; gap: 0; margin-top: 12px; }
-  .bento { grid-template-columns: 1fr; }
+  .nav-cta { font-size: 12px; padding: 7px 16px; }
+
+  /* Layout */
+  .bento { grid-template-columns: 1fr; gap: 10px; }
   .bento-card.large, .bento-card.small, .bento-card.half, .bento-card.third, .bento-card.full { grid-column: span 1; }
+  .bento-card { padding: 24px; border-radius: 14px; }
   .hw-grid { grid-template-columns: 1fr; }
   .hw-item.featured { grid-column: span 1; }
-  .hero-title { letter-spacing: -1.5px; }
+  .hw-layout { grid-template-columns: 1fr !important; }
+  .social-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .social-card { padding: 24px 16px; border-radius: 14px; }
+  .social-card-icon { width: 48px; height: 48px; border-radius: 12px; margin-bottom: 12px; }
+  .social-card-icon svg { width: 22px; height: 22px; }
+  .social-card-name { font-size: 15px; }
+
+  /* Hero */
+  .hero { padding: 90px 16px 60px; min-height: auto; }
+  .hero-title { font-size: clamp(36px, 10vw, 52px); letter-spacing: -1.5px; }
+  .hero-sub { font-size: 15px; margin-bottom: 28px; }
+  .hero-pills { gap: 6px; margin-bottom: 28px; }
+  .pill { font-size: 11px; padding: 6px 12px; }
+  .hero-cta-row { gap: 10px; }
+  .btn-primary, .btn-secondary { font-size: 14px; padding: 12px 22px; }
+  .hero-badge { font-size: 10px; padding: 5px 14px; margin-bottom: 24px; }
+  .hero-scroll { display: none; }
+
+  /* Sections */
   section { padding: 60px 16px; }
-  .section-divider { margin: 0 16px; }
-  footer { padding: 24px 16px 56px; flex-direction: column; text-align: center; }
-  .cta-card { padding: 40px 24px; }
-  .section-divider-terminal { padding: 0 16px; }
-  .social-grid { grid-template-columns: 1fr 1fr; }
-  /* Hide custom cursor on mobile */
+  .section-title { font-size: clamp(26px, 6vw, 36px); }
+  .section-sub { font-size: 15px; margin-bottom: 36px; }
+  .section-divider-terminal { padding: 0 16px; font-size: 9px; }
+  .max-w { padding: 0; }
+
+  /* Terminals: horizontal scroll statt overflow */
+  .terminal-body, .hw-terminal-body { overflow-x: auto; white-space: nowrap; }
+  .terminal { font-size: 11px; }
+  .t-line { white-space: nowrap; }
+
+  /* Cards */
+  .card-title { font-size: 18px; }
+  .card-body { font-size: 13px; }
+  .card-tag { font-size: 9px; }
+  .stat-num { font-size: 36px; }
+
+  /* CTA */
+  .cta-card { padding: 36px 20px; border-radius: 20px; }
+  .cta-title { font-size: clamp(24px, 5vw, 32px); }
+
+  /* Footer */
+  footer { padding: 32px 16px 64px; }
+  .footer-links { gap: 16px; }
+
+  /* YT */
+  .yt-grid { grid-template-columns: 1fr; gap: 10px; }
+
+  /* Performance: reduce visual effects */
+  #scanlines { opacity: .5; }
+  #grain { display: none; }
+  #status-ticker { display: none; }
+
+  /* Custom cursor off on touch */
   #cursor, #cursor-ring { display: none; }
   body { cursor: auto; }
-  a { cursor: pointer; }
+  a, button { cursor: pointer; }
 }
-@media (max-width: 480px) {
+@media (max-width: 400px) {
   .social-grid { grid-template-columns: 1fr; }
-  .hero { padding: 100px 16px 60px; }
-  #status-ticker .ticker-fixed span:nth-child(3) { display: none; }
-}
-@media (max-width: 768px) {
-  .hw-layout { grid-template-columns: 1fr !important; }
+  .hero-title { font-size: clamp(30px, 9vw, 42px); }
+  .bento-card { padding: 20px; }
 }
 </style>
 </head>
@@ -1409,6 +1455,11 @@ footer {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 /* ═══════════════════════════════════════════
+   MOBILE DETECTION
+══════════════════════════════════════════ */
+const isMobile = window.innerWidth <= 768 || ('ontouchstart' in window);
+
+/* ═══════════════════════════════════════════
    i18n — LANGUAGE TOGGLE
 ══════════════════════════════════════════ */
 const i18n = {
@@ -1511,44 +1562,47 @@ document.querySelectorAll('.lang-btn').forEach(btn => {
 });
 
 /* ═══════════════════════════════════════════
-   CIRCUIT SPOTLIGHT
+   CIRCUIT SPOTLIGHT (desktop only)
 ══════════════════════════════════════════ */
 const spotlight = document.getElementById('circuit-spotlight');
-document.addEventListener('mousemove', e => {
-  spotlight.style.background = `radial-gradient(600px circle at ${e.clientX}px ${e.clientY}px,
-    rgba(9,9,11,0) 0%,
-    rgba(9,9,11,0.72) 38%,
-    rgba(9,9,11,0.97) 68%
-  )`;
-});
+if (!isMobile) {
+  document.addEventListener('mousemove', e => {
+    spotlight.style.background = `radial-gradient(600px circle at ${e.clientX}px ${e.clientY}px,
+      rgba(9,9,11,0) 0%,
+      rgba(9,9,11,0.72) 38%,
+      rgba(9,9,11,0.97) 68%
+    )`;
+  });
+} else {
+  spotlight.style.display = 'none';
+}
 
 /* ═══════════════════════════════════════════
-   CUSTOM CURSOR
+   CUSTOM CURSOR (desktop only)
 ══════════════════════════════════════════ */
 const cur = document.getElementById('cursor');
 const ring = document.getElementById('cursor-ring');
 let cx = 0, cy = 0, rx = 0, ry = 0;
 
-document.addEventListener('mousemove', e => {
-  cx = e.clientX; cy = e.clientY;
-  cur.style.left = cx+'px'; cur.style.top = cy+'px';
-});
+if (!isMobile) {
+  document.addEventListener('mousemove', e => {
+    cx = e.clientX; cy = e.clientY;
+    cur.style.left = cx+'px'; cur.style.top = cy+'px';
+  });
 
-function animRing() {
-  rx += (cx - rx) * 0.12;
-  ry += (cy - ry) * 0.12;
-  ring.style.left = rx+'px'; ring.style.top = ry+'px';
-  requestAnimationFrame(animRing);
-}
-animRing();
+  function animRing() {
+    rx += (cx - rx) * 0.12;
+    ry += (cy - ry) * 0.12;
+    ring.style.left = rx+'px'; ring.style.top = ry+'px';
+    requestAnimationFrame(animRing);
+  }
+  animRing();
 
-function setupCursorHovers() {
   document.querySelectorAll('a, button, .bento-card, .hw-item, .pill, .social-card, .yt-thumb').forEach(el => {
     el.addEventListener('mouseenter', () => { cur.classList.add('hover'); ring.classList.add('hover'); });
     el.addEventListener('mouseleave', () => { cur.classList.remove('hover'); ring.classList.remove('hover'); });
   });
 }
-setupCursorHovers();
 
 /* ═══════════════════════════════════════════
    THREE.JS HERO PARTICLES
@@ -1571,7 +1625,7 @@ setupCursorHovers();
   }
   resize(); window.addEventListener('resize', resize);
 
-  const N = 1800;
+  const N = isMobile ? 200 : 1800;
   const geo = new THREE.BufferGeometry();
   const pos = new Float32Array(N * 3);
   const sz = new Float32Array(N);
@@ -1633,7 +1687,8 @@ setupCursorHovers();
   scene.add(pts);
 
   // Tech rings
-  for (let i = 0; i < 3; i++) {
+  const ringCount = isMobile ? 1 : 3;
+  for (let i = 0; i < ringCount; i++) {
     const r = 2.5 + i * 1.4;
     const ringGeo = new THREE.RingGeometry(r - .5, r - .48, 80);
     const ringMat = new THREE.MeshBasicMaterial({
@@ -1673,36 +1728,40 @@ setupCursorHovers();
 })();
 
 /* ═══════════════════════════════════════════
-   HERO BG PARALLAX
+   HERO BG PARALLAX (desktop only)
 ══════════════════════════════════════════ */
-const heroBg = document.getElementById('hero-bg');
-document.addEventListener('mousemove', e => {
-  if (!heroBg) return;
-  const x = (e.clientX / innerWidth - .5) * 8;
-  const y = (e.clientY / innerHeight - .5) * 6;
-  heroBg.style.transform = `scale(1.08) translate(${x}px,${y}px)`;
-});
+if (!isMobile) {
+  const heroBg = document.getElementById('hero-bg');
+  document.addEventListener('mousemove', e => {
+    if (!heroBg) return;
+    const x = (e.clientX / innerWidth - .5) * 8;
+    const y = (e.clientY / innerHeight - .5) * 6;
+    heroBg.style.transform = `scale(1.08) translate(${x}px,${y}px)`;
+  });
+}
 
 /* ═══════════════════════════════════════════
-   BENTO CARD 3D TILT
+   BENTO CARD 3D TILT (desktop only)
 ══════════════════════════════════════════ */
-document.querySelectorAll('[data-tilt]').forEach(card => {
-  card.addEventListener('mousemove', e => {
-    const r = card.getBoundingClientRect();
-    const x = e.clientX - r.left, y = e.clientY - r.top;
-    const cx2 = r.width / 2, cy2 = r.height / 2;
-    const rotX = ((y - cy2) / cy2) * -6;
-    const rotY = ((x - cx2) / cx2) * 6;
-    card.style.transform = `perspective(900px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateZ(8px)`;
-    const glow = card.querySelector('.glow');
-    if (glow) { glow.style.setProperty('--mx', x + 'px'); glow.style.setProperty('--my', y + 'px'); }
+if (!isMobile) {
+  document.querySelectorAll('[data-tilt]').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const r = card.getBoundingClientRect();
+      const x = e.clientX - r.left, y = e.clientY - r.top;
+      const cx2 = r.width / 2, cy2 = r.height / 2;
+      const rotX = ((y - cy2) / cy2) * -6;
+      const rotY = ((x - cx2) / cx2) * 6;
+      card.style.transform = `perspective(900px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateZ(8px)`;
+      const glow = card.querySelector('.glow');
+      if (glow) { glow.style.setProperty('--mx', x + 'px'); glow.style.setProperty('--my', y + 'px'); }
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = '';
+      card.style.transition = 'transform .5s cubic-bezier(.25,.46,.45,.94)';
+      setTimeout(() => card.style.transition = '', 500);
+    });
   });
-  card.addEventListener('mouseleave', () => {
-    card.style.transform = '';
-    card.style.transition = 'transform .5s cubic-bezier(.25,.46,.45,.94)';
-    setTimeout(() => card.style.transition = '', 500);
-  });
-});
+}
 
 /* ═══════════════════════════════════════════
    LIVE TYPEWRITER TERMINAL
@@ -1838,23 +1897,34 @@ if (hwTermEl) hwTermObserver.observe(hwTermEl.closest('.hw-terminal'));
    EMP SHOCKWAVE ON CLICK
 ══════════════════════════════════════════ */
 document.addEventListener('click', e => {
-  const x = e.clientX, y = e.clientY;
+  const x = e.clientX || (e.touches && e.touches[0].clientX) || 0;
+  const y = e.clientY || (e.touches && e.touches[0].clientY) || 0;
 
   // Primary EMP wave ring
   const wave = document.createElement('div');
   wave.className = 'emp-wave';
-  wave.style.cssText = `left:${x}px;top:${y}px;--emp-size:350px;--emp-dur:.8s;`;
+  const waveSize = isMobile ? 200 : 350;
+  wave.style.cssText = `left:${x}px;top:${y}px;--emp-size:${waveSize}px;--emp-dur:.8s;`;
   document.body.appendChild(wave);
   setTimeout(() => wave.remove(), 850);
 
-  // Secondary (larger, fainter) wave
-  const wave2 = document.createElement('div');
-  wave2.className = 'emp-wave secondary';
-  wave2.style.cssText = `left:${x}px;top:${y}px;--emp-size:500px;--emp-dur:1s;`;
-  document.body.appendChild(wave2);
-  setTimeout(() => wave2.remove(), 1100);
+  if (!isMobile) {
+    // Secondary wave (desktop only)
+    const wave2 = document.createElement('div');
+    wave2.className = 'emp-wave secondary';
+    wave2.style.cssText = `left:${x}px;top:${y}px;--emp-size:500px;--emp-dur:1s;`;
+    document.body.appendChild(wave2);
+    setTimeout(() => wave2.remove(), 1100);
 
-  // Screen-wide radial flash from click point
+    // Horizontal scanline burst (desktop only)
+    const scanline = document.createElement('div');
+    scanline.className = 'emp-scanline';
+    scanline.style.top = y + 'px';
+    document.body.appendChild(scanline);
+    setTimeout(() => scanline.remove(), 650);
+  }
+
+  // Screen-wide radial flash
   const flash = document.createElement('div');
   flash.className = 'emp-flash';
   flash.style.setProperty('--fx', x + 'px');
@@ -1862,22 +1932,16 @@ document.addEventListener('click', e => {
   document.body.appendChild(flash);
   setTimeout(() => flash.remove(), 500);
 
-  // Horizontal scanline burst at click Y
-  const scanline = document.createElement('div');
-  scanline.className = 'emp-scanline';
-  scanline.style.top = y + 'px';
-  document.body.appendChild(scanline);
-  setTimeout(() => scanline.remove(), 650);
-
-  // "Glitch hit" nearby cards/elements within 300px radius
+  // Glitch hit nearby elements
+  const hitRadius = isMobile ? 150 : 300;
   document.querySelectorAll('.bento-card, .social-card, .hw-item, .yt-thumb, .pill, .info-card').forEach(el => {
     const rect = el.getBoundingClientRect();
     const elCx = rect.left + rect.width / 2;
     const elCy = rect.top + rect.height / 2;
     const dist = Math.hypot(elCx - x, elCy - y);
-    if (dist < 300) {
+    if (dist < hitRadius) {
       el.classList.remove('emp-hit');
-      void el.offsetWidth; // reflow to restart animation
+      void el.offsetWidth;
       el.classList.add('emp-hit');
       setTimeout(() => el.classList.remove('emp-hit'), 400);
     }
@@ -1915,17 +1979,19 @@ window.addEventListener('scroll', () => {
 });
 
 /* ═══════════════════════════════════════════
-   MAGNETIC BUTTONS
+   MAGNETIC BUTTONS (desktop only)
 ══════════════════════════════════════════ */
-document.querySelectorAll('.btn-primary, .nav-cta, .yt-btn').forEach(btn => {
-  btn.addEventListener('mousemove', e => {
-    const r = btn.getBoundingClientRect();
-    const x = e.clientX - r.left - r.width / 2;
-    const y = e.clientY - r.top - r.height / 2;
-    btn.style.transform = `translate(${x * .18}px, ${y * .18}px)`;
+if (!isMobile) {
+  document.querySelectorAll('.btn-primary, .nav-cta, .yt-btn').forEach(btn => {
+    btn.addEventListener('mousemove', e => {
+      const r = btn.getBoundingClientRect();
+      const x = e.clientX - r.left - r.width / 2;
+      const y = e.clientY - r.top - r.height / 2;
+      btn.style.transform = `translate(${x * .18}px, ${y * .18}px)`;
+    });
+    btn.addEventListener('mouseleave', () => { btn.style.transform = ''; });
   });
-  btn.addEventListener('mouseleave', () => { btn.style.transform = ''; });
-});
+}
 
 /* ═══════════════════════════════════════════
    MOBILE MENU
@@ -1953,18 +2019,19 @@ mobileMenu.querySelectorAll('a').forEach(a => {
 });
 
 /* ═══════════════════════════════════════════
-   PARALLAX ON SCROLL
+   PARALLAX ON SCROLL (desktop only)
 ══════════════════════════════════════════ */
-window.addEventListener('scroll', () => {
-  const scrolled = window.scrollY;
-  // Parallax on section labels
-  document.querySelectorAll('.section-label').forEach(el => {
-    const rect = el.getBoundingClientRect();
-    if (rect.top < window.innerHeight && rect.bottom > 0) {
-      el.style.transform = `translateX(${(scrolled - el.offsetTop) * 0.02}px)`;
-    }
+if (!isMobile) {
+  window.addEventListener('scroll', () => {
+    const scrolled = window.scrollY;
+    document.querySelectorAll('.section-label').forEach(el => {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < window.innerHeight && rect.bottom > 0) {
+        el.style.transform = `translateX(${(scrolled - el.offsetTop) * 0.02}px)`;
+      }
+    });
   });
-});
+}
 
 /* ═══════════════════════════════════════════
    SMOOTH SCROLL FOR NAV LINKS
@@ -1988,7 +2055,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   const bar = document.getElementById('boot-progress-bar');
   if (!overlay || !log) return;
 
-  const lines = [
+  const linesFull = [
     { text: '[BIOS] Hinske.Tech Bootloader v2.6.0', cls: 'boot-dim', delay: 250 },
     { text: '[INIT] Loading kernel modules...', cls: 'boot-dim', delay: 200 },
     { text: '[  OK  ] GPU detected: NVIDIA GTX 1080 (8 GB VRAM)', cls: 'boot-ok', delay: 220 },
@@ -2004,45 +2071,60 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     { text: '', cls: 'boot-dim', delay: 250 },
     { text: '> hinske.tech --start --mode=playground', cls: 'boot-white', delay: 500 },
   ];
+  const linesMobile = [
+    { text: '[BIOS] Hinske.Tech v2.6.0', cls: 'boot-dim', delay: 200 },
+    { text: '[  OK  ] GPU: GTX 1080 (8 GB)', cls: 'boot-ok', delay: 180 },
+    { text: '[  OK  ] Systems loaded', cls: 'boot-ok', delay: 180 },
+    { text: '[READY] All operational.', cls: 'boot-gold', delay: 300 },
+    { text: '> hinske.tech --start', cls: 'boot-white', delay: 400 },
+  ];
+  const lines = isMobile ? linesMobile : linesFull;
 
   const crtLine = document.getElementById('crt-line');
   const crtFlash = document.getElementById('crt-flash');
 
   function crtTransition() {
     bar.style.width = '100%';
+    // Mobile: faster timings
+    const t = isMobile ? { fade: 300, collapse: 600, line: 900, flash: 1200, clean: 1600 }
+                       : { fade: 600, collapse: 1200, line: 2000, flash: 2800, clean: 3500 };
 
-    // Phase 1: Hold the final line visible, then fade out text
+    // Phase 1: Fade out text
     setTimeout(() => {
-      log.style.transition = 'opacity .4s ease-out';
+      log.style.transition = isMobile ? 'opacity .2s ease-out' : 'opacity .4s ease-out';
       log.style.opacity = '0';
-    }, 600);
+    }, t.fade);
 
-    // Phase 2: Boot text gone, screen collapses to horizontal line
+    // Phase 2: Collapse to horizontal line
     setTimeout(() => {
-      overlay.style.transition = 'height .6s cubic-bezier(.4,0,1,1), top .6s cubic-bezier(.4,0,1,1)';
+      const dur = isMobile ? '.3s' : '.6s';
+      overlay.style.transition = `height ${dur} cubic-bezier(.4,0,1,1), top ${dur} cubic-bezier(.4,0,1,1)`;
       overlay.style.height = '2px';
       overlay.style.top = 'calc(50vh - 1px)';
       overlay.style.overflow = 'hidden';
       overlay.querySelector('#boot-progress').style.display = 'none';
-    }, 1200);
+    }, t.collapse);
 
-    // Phase 3: Gold CRT line expands and fills screen
+    // Phase 3: Gold CRT line expands
     setTimeout(() => {
-      crtLine.style.animation = 'crtLineExpand 1.2s cubic-bezier(.25,.46,.45,.94) forwards';
-    }, 2000);
+      const dur = isMobile ? '.6s' : '1.2s';
+      crtLine.style.animation = `crtLineExpand ${dur} cubic-bezier(.25,.46,.45,.94) forwards`;
+    }, t.line);
 
-    // Phase 4: Flash + scanline intensification
+    // Phase 4: Flash
     setTimeout(() => {
-      crtFlash.style.animation = 'crtFlash .6s ease forwards';
-      const scanlines = document.getElementById('scanlines');
-      if (scanlines) {
-        scanlines.style.transition = 'opacity .5s';
-        scanlines.style.opacity = '1';
-        setTimeout(() => { scanlines.style.opacity = ''; scanlines.style.transition = ''; }, 600);
+      crtFlash.style.animation = `crtFlash ${isMobile ? '.3s' : '.6s'} ease forwards`;
+      if (!isMobile) {
+        const scanlines = document.getElementById('scanlines');
+        if (scanlines) {
+          scanlines.style.transition = 'opacity .5s';
+          scanlines.style.opacity = '1';
+          setTimeout(() => { scanlines.style.opacity = ''; scanlines.style.transition = ''; }, 600);
+        }
       }
-    }, 2800);
+    }, t.flash);
 
-    // Phase 5: Clean up, reveal page
+    // Phase 5: Clean up
     setTimeout(() => {
       overlay.style.display = 'none';
       crtLine.style.display = 'none';
@@ -2051,7 +2133,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
       overlay.remove();
       crtLine.remove();
       crtFlash.remove();
-    }, 3500);
+    }, t.clean);
   }
 
   let idx = 0;
@@ -2092,7 +2174,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   window.addEventListener('resize', resize);
 
   const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン{}[]<>/\\|=+-_*&^%$#@!?;:,.~`';
-  const fontSize = 12;
+  const fontSize = isMobile ? 22 : 12;
   let columns = Math.floor(canvas.width / fontSize);
   let drops = Array(columns).fill(1);
 
@@ -2117,7 +2199,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     }
   }
 
-  setInterval(draw, 50);
+  setInterval(draw, isMobile ? 100 : 50);
 })();
 
 /* ═══════════════════════════════════════════
@@ -2144,8 +2226,8 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     }
   }
 
-  // Start after boot sequence + CRT transition (~7.5s)
-  setTimeout(typeChar, 7500);
+  // Start after boot sequence + CRT transition
+  setTimeout(typeChar, isMobile ? 3000 : 7500);
 })();
 
 /* ═══════════════════════════════════════════
