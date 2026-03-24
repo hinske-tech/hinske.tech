@@ -716,6 +716,38 @@ footer {
 }
 
 
+/* ─── Mobile CSS Fallbacks (hidden on desktop) ── */
+.hero-canvas-fallback {
+  display: none; /* shown via media query on mobile */
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 45%, rgba(212,160,23,0.1) 0%, transparent 70%),
+    radial-gradient(circle at 30% 60%, rgba(59,130,246,0.04) 0%, transparent 50%),
+    radial-gradient(circle at 70% 30%, rgba(212,160,23,0.06) 0%, transparent 40%);
+  animation: heroPulse 5s ease-in-out infinite;
+}
+@keyframes heroPulse {
+  0%,100% { opacity: .4; transform: scale(1); }
+  50%     { opacity: .8; transform: scale(1.03); }
+}
+
+.matrix-rain-css {
+  display: none; /* shown via media query on mobile */
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  overflow: hidden; opacity: .05;
+}
+.matrix-rain-css .rain-col {
+  position: absolute; top: -100%; width: 1px;
+  background: linear-gradient(to bottom, transparent 0%, var(--gold) 40%, var(--gold) 60%, transparent 100%);
+  animation: rainFall var(--dur) linear infinite;
+  animation-delay: var(--delay);
+  opacity: var(--op);
+}
+@keyframes rainFall {
+  0%   { transform: translateY(0); }
+  100% { transform: translateY(250vh); }
+}
+
 /* ─── EMP Shockwave on Click ────────────── */
 .emp-wave {
   position: fixed; pointer-events: none; z-index: 9996;
@@ -889,13 +921,27 @@ footer {
   /* YT */
   .yt-grid { grid-template-columns: 1fr; gap: 10px; }
 
-  /* Performance: reduce visual effects */
-  #scanlines { opacity: .5; }
-  #grain { display: none; }
-  #status-ticker { display: none; }
+  /* === MOBILE PERFORMANCE: kill canvas, keep DOM/CSS === */
 
-  /* Custom cursor off on touch */
+  /* Canvas elements: OFF */
+  #hero-canvas { display: none !important; }
+  #matrix-rain { display: none !important; }
+  #grain { display: none !important; }
+
+  /* Show CSS fallback for hero particles */
+  .hero-canvas-fallback { display: block !important; }
+
+  /* Show CSS fallback for matrix rain */
+  .matrix-rain-css { display: block !important; }
+
+  /* Other heavy stuff: OFF */
+  #status-ticker { display: none; }
+  #circuit-spotlight { display: none !important; }
   #cursor, #cursor-ring { display: none; }
+
+  /* Scanlines stay (pure CSS = free) */
+  #scanlines { opacity: .4; }
+
   body { cursor: auto; }
   a, button { cursor: pointer; }
 }
@@ -920,8 +966,9 @@ footer {
 <div id="scanlines"></div>
 <div id="grain"></div>
 
-<!-- Matrix Rain -->
+<!-- Matrix Rain (Canvas for desktop, CSS for mobile) -->
 <canvas id="matrix-rain"></canvas>
+<div class="matrix-rain-css" id="matrix-rain-css"></div>
 
 <!-- Circuit Background -->
 <div id="circuit-bg"></div>
@@ -972,6 +1019,7 @@ footer {
   <div class="hero-bg" id="hero-bg"></div>
   <div class="hero-bg-overlay"></div>
   <canvas id="hero-canvas"></canvas>
+  <div class="hero-canvas-fallback"></div>
 
   <div class="hero-content">
     <div class="hero-badge">
@@ -1608,6 +1656,7 @@ if (!isMobile) {
    THREE.JS HERO PARTICLES
 ══════════════════════════════════════════ */
 (function() {
+  if (isMobile) return; // CSS fallback handles mobile
   const canvas = document.getElementById('hero-canvas');
   if (!canvas) return;
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
@@ -1625,7 +1674,7 @@ if (!isMobile) {
   }
   resize(); window.addEventListener('resize', resize);
 
-  const N = isMobile ? 200 : 1800;
+  const N = 1800;
   const geo = new THREE.BufferGeometry();
   const pos = new Float32Array(N * 3);
   const sz = new Float32Array(N);
@@ -1687,8 +1736,7 @@ if (!isMobile) {
   scene.add(pts);
 
   // Tech rings
-  const ringCount = isMobile ? 1 : 3;
-  for (let i = 0; i < ringCount; i++) {
+  for (let i = 0; i < 3; i++) {
     const r = 2.5 + i * 1.4;
     const ringGeo = new THREE.RingGeometry(r - .5, r - .48, 80);
     const ringMat = new THREE.MeshBasicMaterial({
@@ -1897,34 +1945,45 @@ if (hwTermEl) hwTermObserver.observe(hwTermEl.closest('.hw-terminal'));
    EMP SHOCKWAVE ON CLICK
 ══════════════════════════════════════════ */
 document.addEventListener('click', e => {
-  const x = e.clientX || (e.touches && e.touches[0].clientX) || 0;
-  const y = e.clientY || (e.touches && e.touches[0].clientY) || 0;
+  const x = e.clientX || 0;
+  const y = e.clientY || 0;
 
-  // Primary EMP wave ring
+  if (isMobile) {
+    // Mobile: just a single wave + flash, no DOM queries
+    const wave = document.createElement('div');
+    wave.className = 'emp-wave';
+    wave.style.cssText = `left:${x}px;top:${y}px;--emp-size:180px;--emp-dur:.6s;`;
+    document.body.appendChild(wave);
+    setTimeout(() => wave.remove(), 650);
+
+    const flash = document.createElement('div');
+    flash.className = 'emp-flash';
+    flash.style.setProperty('--fx', x + 'px');
+    flash.style.setProperty('--fy', y + 'px');
+    document.body.appendChild(flash);
+    setTimeout(() => flash.remove(), 500);
+    return;
+  }
+
+  // Desktop: full EMP
   const wave = document.createElement('div');
   wave.className = 'emp-wave';
-  const waveSize = isMobile ? 200 : 350;
-  wave.style.cssText = `left:${x}px;top:${y}px;--emp-size:${waveSize}px;--emp-dur:.8s;`;
+  wave.style.cssText = `left:${x}px;top:${y}px;--emp-size:350px;--emp-dur:.8s;`;
   document.body.appendChild(wave);
   setTimeout(() => wave.remove(), 850);
 
-  if (!isMobile) {
-    // Secondary wave (desktop only)
-    const wave2 = document.createElement('div');
-    wave2.className = 'emp-wave secondary';
-    wave2.style.cssText = `left:${x}px;top:${y}px;--emp-size:500px;--emp-dur:1s;`;
-    document.body.appendChild(wave2);
-    setTimeout(() => wave2.remove(), 1100);
+  const wave2 = document.createElement('div');
+  wave2.className = 'emp-wave secondary';
+  wave2.style.cssText = `left:${x}px;top:${y}px;--emp-size:500px;--emp-dur:1s;`;
+  document.body.appendChild(wave2);
+  setTimeout(() => wave2.remove(), 1100);
 
-    // Horizontal scanline burst (desktop only)
-    const scanline = document.createElement('div');
-    scanline.className = 'emp-scanline';
-    scanline.style.top = y + 'px';
-    document.body.appendChild(scanline);
-    setTimeout(() => scanline.remove(), 650);
-  }
+  const scanline = document.createElement('div');
+  scanline.className = 'emp-scanline';
+  scanline.style.top = y + 'px';
+  document.body.appendChild(scanline);
+  setTimeout(() => scanline.remove(), 650);
 
-  // Screen-wide radial flash
   const flash = document.createElement('div');
   flash.className = 'emp-flash';
   flash.style.setProperty('--fx', x + 'px');
@@ -1932,14 +1991,12 @@ document.addEventListener('click', e => {
   document.body.appendChild(flash);
   setTimeout(() => flash.remove(), 500);
 
-  // Glitch hit nearby elements
-  const hitRadius = isMobile ? 150 : 300;
   document.querySelectorAll('.bento-card, .social-card, .hw-item, .yt-thumb, .pill, .info-card').forEach(el => {
     const rect = el.getBoundingClientRect();
     const elCx = rect.left + rect.width / 2;
     const elCy = rect.top + rect.height / 2;
     const dist = Math.hypot(elCx - x, elCy - y);
-    if (dist < hitRadius) {
+    if (dist < 300) {
       el.classList.remove('emp-hit');
       void el.offsetWidth;
       el.classList.add('emp-hit');
@@ -2162,6 +2219,25 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
    MATRIX CODE RAIN
 ══════════════════════════════════════════ */
 (function() {
+  if (isMobile) {
+    // CSS-only rain columns for mobile
+    const container = document.getElementById('matrix-rain-css');
+    if (!container) return;
+    const colCount = 25;
+    for (let i = 0; i < colCount; i++) {
+      const col = document.createElement('div');
+      col.className = 'rain-col';
+      const left = (i / colCount * 100) + (Math.random() * 3) + '%';
+      const dur = (4 + Math.random() * 6) + 's';
+      const delay = (Math.random() * -10) + 's';
+      const h = (30 + Math.random() * 80) + 'px';
+      const op = (0.3 + Math.random() * 0.7);
+      col.style.cssText = `left:${left};height:${h};--dur:${dur};--delay:${delay};--op:${op};`;
+      container.appendChild(col);
+    }
+    return;
+  }
+  // Desktop: Canvas rain
   const canvas = document.getElementById('matrix-rain');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
@@ -2174,7 +2250,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   window.addEventListener('resize', resize);
 
   const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン{}[]<>/\\|=+-_*&^%$#@!?;:,.~`';
-  const fontSize = isMobile ? 22 : 12;
+  const fontSize = 12;
   let columns = Math.floor(canvas.width / fontSize);
   let drops = Array(columns).fill(1);
 
@@ -2199,7 +2275,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     }
   }
 
-  setInterval(draw, isMobile ? 100 : 50);
+  setInterval(draw, 50);
 })();
 
 /* ═══════════════════════════════════════════
